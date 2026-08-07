@@ -1,0 +1,19 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Segoe UI Mono',
+    Menlo, Consolas, monospace;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-slate-950 text-slate-300 antialiased;
+  font-feature-settings: 'tnum' 1;
+}
+
+::selection {
+  @apply bg-sky-500/30;
+}
