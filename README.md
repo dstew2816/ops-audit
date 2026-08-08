@@ -15,6 +15,7 @@ finds the difference.
 npm install
 npm run dev      # http://localhost:5173
 npm run build    # static output in dist/, deployable to GitHub Pages
+npm run record   # re-capture the Generate tab's recorded responses (needs a key)
 ```
 
 `vite.config.js` sets `base: './'`, so the build works from any Pages subpath.
@@ -77,9 +78,77 @@ equality, so a detector with RB-001's configuration cannot see
 `unresponsive_degraded` any more than the live platform could. The interval is in
 the data and can be found; surfacing it needs analysis this pass does not do.
 
+## Generation
+
+The Runbooks and Audit tabs assume the runbook definitions already exist. In
+practice they do not: what exists is process documentation written by the people
+who run the process. The **Generate** tab covers that step — messy prose in,
+executable definition out, then the same detection engine run against it.
+
+`src/data/templates.js` holds two templates, each documenting a runbook the
+platform already has configured. They are deliberately unhelpful: two languages
+interleaved mid-document, superseded values left inline beside current ones, the
+threshold stated twice in different places, exclusions written as a range buried
+in a parenthetical, one of them a forwarded email thread that never made it to
+the wiki. Both are editable in place.
+
+`src/engine/generate.js` sends the text to `claude-opus-5` under a JSON schema
+(structured outputs), so the response is already valid JSON of the right shape.
+The app validates it again independently — the check belongs here, not to the
+generation call, and it still runs if the schema, the model, or the transport
+changes. Raw response and parsed definition are shown side by side, along with a
+field-by-field comparison against the runbook as configured.
+
+The generated definition is then run through `detect()` over the same events and
+execution log, scored beside the configured runbook so any difference in the
+miss set is attributable to the definition and nothing else.
+
+**The generated definition takes the ID of the runbook its documentation
+describes.** The anti-join matches on `runbookId + resourceId`; under a fresh ID
+it would match no executions at all and report every qualifying interval as a
+miss. Both templates currently reconstruct their runbook exactly, so the miss
+count is unchanged — edit a threshold or drop an exclusion from the source
+document to move it.
+
+### Live and demo modes
+
+| | Key present | No key |
+|---|---|---|
+| Generate | Calls the Anthropic API from the browser | Replays a recorded response |
+| Edited template | Sent to the model as written | No matching recording; says so |
+
+The key is read from `import.meta.env.VITE_ANTHROPIC_API_KEY`. Copy
+`.env.example` to `.env` (gitignored) to enable live generation locally.
+
+> **Vite inlines every `VITE_`-prefixed variable into the bundle as a plain
+> string.** A key present when `npm run build` runs ends up in the published
+> JavaScript in readable form. Use it for `npm run dev` and `npm run record`
+> only — never for a build you intend to publish. The Pages workflow
+> deliberately provides no key, which is what puts the deployed build in demo
+> mode.
+
+Demo mode serves `src/data/recordedResponses.js`, keyed by template and bound to
+a hash of the exact template text. Edit a template and its recording stops
+matching, which is intended — the tab then says it has no recording rather than
+answering a question nobody asked. The UI labels recorded responses on screen.
+
+`npm run record` calls the model once per template and rewrites that file,
+importing the prompt and schema from `src/engine/generate.js` so a recording is
+always a recording of what the app actually sends.
+
+> The recordings currently checked in are **hand-written placeholders**, authored
+> to the response schema rather than captured from a live call. They carry no
+> token counts or timestamps because there is no real call behind them. The
+> Generate tab says so while `FIXTURES_ARE_SYNTHETIC` is true; `npm run record`
+> replaces them and clears the flag.
+
 ## Scope
 
 Detection and display only. Root-cause categorisation — deciding that a given
 miss belongs to the infrastructure, configuration, data, logic-gap, or
 detector-error class — is deliberately left to the next pass. The miss records
 already carry the fields it will need.
+
+The generation layer is extraction only. It reports what a document says, not
+what a sensible runbook would say, and it does not decide whether a definition
+should be adopted.

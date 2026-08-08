@@ -6,11 +6,13 @@ import { detect } from './engine/detect';
 import TabBar from './components/TabBar';
 import RunbooksTab from './components/RunbooksTab';
 import AuditTab from './components/AuditTab';
+import GenerateTab from './components/GenerateTab';
 import { formatTimestamp } from './engine/time';
 
 const TABS = [
   { id: 'runbooks', label: 'Runbooks' },
   { id: 'audit', label: 'Audit' },
+  { id: 'generate', label: 'Generate' },
 ];
 
 export default function App() {
@@ -70,7 +72,7 @@ export default function App() {
       </header>
 
       <main className="mx-auto max-w-[1400px] px-6 py-6">
-        {tab === 'runbooks' ? (
+        {tab === 'runbooks' && (
           <RunbooksTab
             runbooks={runbooks}
             executionLog={executionLog}
@@ -78,9 +80,9 @@ export default function App() {
             windowStart={WINDOW_START}
             windowEnd={ANALYSIS_END}
           />
-        ) : (
-          <AuditTab result={result} />
         )}
+        {tab === 'audit' && <AuditTab result={result} />}
+        {tab === 'generate' && <GenerateTab />}
       </main>
     </div>
   );

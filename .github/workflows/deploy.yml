@@ -30,6 +30,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # No VITE_ANTHROPIC_API_KEY here, deliberately. Vite inlines every
+      # VITE_-prefixed variable into the bundle as a plain string, so a key
+      # supplied at this step would be published in readable form on a public
+      # site. Its absence is what puts the deployed build into demo mode,
+      # where the Generate tab replays recorded responses. Do not add one.
       - name: Build
         run: npm run build
 

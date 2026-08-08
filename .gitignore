@@ -3,3 +3,9 @@ dist
 .DS_Store
 *.local
 .vite
+
+# Never commit an API key. Vite inlines every VITE_-prefixed variable into the
+# bundle, so a key in .env at build time ends up in the published JavaScript.
+.env
+.env.*
+!.env.example
