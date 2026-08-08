@@ -7,14 +7,17 @@
 // Run this whenever a template changes: a recording is bound to the exact
 // template text it answers, so an edited template invalidates its recording.
 //
-// This is a build-time script. It reads the key from the process environment
-// and nothing it writes contains the key.
+// This is a build-time script. Nothing it writes contains the key.
 
 import { writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 import Anthropic from '@anthropic-ai/sdk';
+// Vite's own .env loader, so this script reads the key from exactly the file
+// the app reads it from. Plain Node does not load .env on its own, and asking
+// for the key to be exported separately would mean two places to keep it.
+import { loadEnv } from 'vite';
 
 import { templates } from '../src/data/templates.js';
 import { hashText } from '../src/engine/hash.js';
@@ -28,15 +31,19 @@ import {
   buildUserPrompt,
 } from '../src/engine/generate.js';
 
-const OUT = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '../src/data/recordedResponses.js',
-);
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const OUT = path.join(ROOT, 'src/data/recordedResponses.js');
 
-const apiKey = process.env.VITE_ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY;
+// .env first (where the app's key lives), then the shell for CI use.
+const fileEnv = loadEnv('development', ROOT, 'VITE_');
+const apiKey =
+  fileEnv.VITE_ANTHROPIC_API_KEY ||
+  process.env.VITE_ANTHROPIC_API_KEY ||
+  process.env.ANTHROPIC_API_KEY;
+
 if (!apiKey) {
   console.error(
-    'No API key. Set VITE_ANTHROPIC_API_KEY (or ANTHROPIC_API_KEY) and run again.',
+    'No API key. Put VITE_ANTHROPIC_API_KEY in .env at the repo root (see .env.example), or export it, and run again.',
   );
   process.exit(1);
 }
