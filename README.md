@@ -95,7 +95,17 @@ Every scorer is tested to fail: the self-tests feed deliberately wrong answers t
 
 ## Where else this applies
 
-Anywhere automation acts on conditions it detects in real time: warehouse and fulfillment networks, supplier and carrier integrations, service-desk and IT operations runbooks. The cases an automation never picked up are not in its denominator, and nobody checks.
+An audit like this needs two independent sources anywhere it runs: (a) raw events showing that a condition happened, and (b) the automation's own record of what it did. A silent miss is a gap between the two.
+
+| Domain | The rule | The silent miss | The two sources you'd need |
+|---|---|---|---|
+| Warehouse inventory | Stock falls below the reorder point, so a purchase order should be created | Stock fell below the point and no purchase order exists | Inventory snapshots + purchase order log |
+| Shipping and logistics | A shipment passes its delay threshold, so an exception ticket or customer alert should go out | The shipment was delayed and no ticket or alert exists | Carrier tracking events + ticketing and notification log |
+| Quality holds | A hold expires, so the lot should be released or escalated | The hold expired and the lot sat untouched | Hold records + lot movement log |
+| Customer service and IT operations | A ticket breaches its service-level target, so it should escalate | It breached and never escalated | Ticket timestamps + escalation log |
+| Banking operations | A complaint or dispute passes its response deadline, so it should get a response or escalate | It passed the deadline with no response | Complaint intake records + response log |
+
+Running the audit outside this project means getting both sources and agreeing on the rule's exact definition first; in practice the hard part is access to the automation's own log, not the detection logic. Public datasets rarely include both sources, which is why the audit itself uses synthetic data here, with a separate real-data stress test on the UCI SECOM dataset for the statistical process control and classification methods.
 
 ## Built with
 
