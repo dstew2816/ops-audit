@@ -1,3 +1,4 @@
+// App shell: the header and the tab navigation for every view.
 import { useState } from 'react';
 import TabBar from './components/TabBar';
 import OverviewTab from './components/OverviewTab';

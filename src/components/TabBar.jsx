@@ -1,3 +1,4 @@
+// Tab navigation bar with an optional count badge on each tab.
 export default function TabBar({ tabs, active, onChange, counts = {} }) {
   return (
     <nav className="-mb-px flex gap-1" aria-label="Sections">
