@@ -131,14 +131,6 @@ export function queryValue(db, sql, options = {}) {
   return Object.values(result.rows[0])[0] ?? null;
 }
 
-/**
- * Run several statements and return one result per statement. Reads only,
- * same as runQuery; useful for a batch of probes.
- */
-export function runQueries(db, statements, options = {}) {
-  return statements.map((sql) => runQuery(db, sql, options));
-}
-
 /** Table names present in the database, in schema order. */
 export function listTables(db) {
   const result = runQuery(
@@ -146,16 +138,4 @@ export function listTables(db) {
     "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY rootpage",
   );
   return result.rows.map((row) => row.name);
-}
-
-/** Column metadata for one table: name, declared type, nullability. */
-export function describeTable(db, table) {
-  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(table)) return [];
-  const result = runQuery(db, `PRAGMA table_info(${table})`);
-  return result.rows.map((row) => ({
-    name: row.name,
-    type: row.type,
-    nullable: row.notnull === 0,
-    primaryKey: row.pk > 0,
-  }));
 }

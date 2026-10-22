@@ -352,10 +352,3 @@ El grupo de destino se incluye en el aviso para que el turno sepa a quién
 llamar. No influye en la condición.`,
   },
 ];
-
-export const sqlTemplatesById = Object.fromEntries(
-  sqlTemplates.map((template) => [template.id, template]),
-);
-
-/** The ASOPs these templates cover, in roster order. */
-export const COVERED_ASOPS = sqlTemplates.map((template) => template.asopId).sort();

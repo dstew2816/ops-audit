@@ -36,10 +36,3 @@ export function loadDatabase() {
   }
   return loading;
 }
-
-/** Drop the cached database. Mainly for hot reload and tests. */
-export function resetDatabase() {
-  const pending = loading;
-  loading = null;
-  if (pending) pending.then((db) => db.close()).catch(() => {});
-}
