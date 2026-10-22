@@ -1,0 +1,284 @@
+{
+  "model": "claude-opus-5",
+  "recordedAt": "2026-10-21T19:21:02.991Z",
+  "usage": {
+    "inputTokens": 10464,
+    "outputTokens": 13879
+  },
+  "elapsedMs": 165675,
+  "misses": 24,
+  "findings": [
+    {
+      "title": "PW-004 unplanned outage (2026-07-29T02:00–08:00Z) with no replay swallowed eight candidates across four automations",
+      "causeClass": "infrastructure",
+      "missIds": [
+        "ASOP-114:P-104:2026-07-29T02:35:00Z",
+        "ASOP-114:P-110:2026-07-29T03:20:00Z",
+        "ASOP-207:B-8804:S-23:2026-07-29T02:15:00Z",
+        "ASOP-207:B-8810:S-20:2026-07-29T03:03:00Z",
+        "ASOP-233:T-04:2026-07-29T02:25:00Z",
+        "ASOP-233:T-20:2026-07-29T03:40:00Z",
+        "ASOP-402:C-018",
+        "ASOP-402:C-050"
+      ],
+      "cause": "The orchestrator cluster was offline for the whole of PW-004 and performed no replay on recovery. For each of these eight, the moment the condition first satisfied its own automation's definition falls strictly inside 2026-07-29T02:00:00Z–08:00:00Z, so the event-driven platform had no live trigger and never revisited them. ASOP-114 P-104 qualified at 03:05 (entered 02:35 + 30 min) and P-110 at 03:50 (03:20 + 30); ASOP-233 T-04 qualified at 02:55 (02:25 + 30) and T-20 at 04:10 (03:40 + 30), both unscheduled RC-ALARM; ASOP-402 C-018 qualified at 02:40 (due 02:10 + 30 grace) and C-050 at 06:50 (due 06:20 + 30 grace); ASOP-207 B-8804 and B-8810 had their latest moving event posted at 02:50 and 04:15 with remaining time already negative. All four intervals that close (06:05, 06:28, 05:55, 06:05) also close before the platform returned at 08:00, so no post-recovery edge existed either.",
+      "evidence": [
+        "PW-004: status \"down\", window_start \"2026-07-29T02:00:00Z\", window_end \"2026-07-29T08:00:00Z\", note \"Unplanned outage. Orchestrator cluster offline for 6h. No replay of missed candidates on recovery.\"",
+        "Every one of these eight rows carries \"platform_status\": \"down\"",
+        "ASOP-114 thresholdMinutes 30: P-104 entered_at 2026-07-29T02:35:00Z / exited_at 06:05:00Z (blocked_minutes 210), P-110 entered_at 03:20:00Z / exited_at 06:28:00Z (188), both port_mode \"auto\", bypass null",
+        "ASOP-233 thresholdMinutes 30, excludeScheduled true: T-04 status_start 02:25:00Z / status_end 05:55:00Z reason_code \"RC-ALARM\"; T-20 status_start 03:40:00Z / status_end 06:05:00Z reason_code \"RC-ALARM\"; both bypass null",
+        "ASOP-402 graceMinutes 30: C-018 due_at 2026-07-29T02:10:00Z, C-050 due_at 2026-07-29T06:20:00Z, both bypass null, tool_ids T-18 and T-02 inside the \"tool_id BETWEEN 'T-01' AND 'T-22'\" constriction",
+        "ASOP-207 thresholdMinutesRemaining 60: B-8804 event_at 02:50:00Z minutes_remaining -35 event_type \"in_transit\"; B-8810 event_at 04:15:00Z minutes_remaining -72 event_type \"queued\"",
+        "\"The platform is event-driven and performs no historical replay.\""
+      ],
+      "confidence": "high"
+    },
+    {
+      "title": "Maintenance-mode bypass stood down both port automations as designed",
+      "causeClass": "configuration",
+      "missIds": [
+        "ASOP-114:P-106:2026-07-30T16:10:00Z",
+        "ASOP-118:P-114:2026-07-29T17:24:00Z"
+      ],
+      "cause": "ASOP-114 and ASOP-118 share one bypass clause, port_mode = 'maint': a port under maintenance is not dispatched to. Both candidates were attributed that bypass and both occurred while the platform was up, so the stand-down — not any platform or query defect — is what accounts for each silence individually. P-106 exceeded the 30-minute blocked threshold (145 min) and P-114 exceeded the 15-minute error threshold (58 min); each condition genuinely occurred and was deliberately not actioned.",
+      "evidence": [
+        "ASOP-114 bypass: name \"maintenance mode\", clause \"port_mode = 'maint'\", note \"A port under maintenance is not dispatched to. Explains the silence; the block still happened.\"",
+        "ASOP-118 bypass note: \"Same bypass as ASOP-114, and it is the only thing these two share besides the table.\"",
+        "P-106 row: \"port_mode\": \"maint\", \"bypass\": \"port_mode = maint\", blocked_minutes 145, platform_status \"up\" (inside PW-005, nominal)",
+        "P-114 row: \"bypass\": \"port_mode = maint\", error_minutes 58 against thresholdMinutes 15, platform_status \"up\" (entered_at 2026-07-29T17:24:00Z, after PW-004 recovery at 08:00)"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "title": "RC-FACILITY bypass routed the tool-down candidate to a separate escalation path",
+      "causeClass": "configuration",
+      "missIds": [
+        "ASOP-233:T-09:2026-08-04T14:05:00Z"
+      ],
+      "cause": "ASOP-233 stands down on reason_code = 'RC-FACILITY' because facility-wide events are escalated elsewhere. T-09 was down 130 unscheduled minutes while the platform was nominal, so the bypass is the entire explanation for the silence.",
+      "evidence": [
+        "ASOP-233 bypass: clause \"reason_code = 'RC-FACILITY'\", note \"Facility events are handled by a separate escalation path, so this ASOP stays quiet. The tool was still down and unscheduled.\"",
+        "Row: \"reason_code\": \"RC-FACILITY\", \"bypass\": \"reason_code = RC-FACILITY\", down_minutes 130 vs thresholdMinutes 30, platform_status \"up\"",
+        "2026-08-04T14:05:00Z falls inside PW-007 (\"up\", \"Nominal.\")"
+      ],
+      "confidence": "high"
+    },
+    {
+      "title": "ASOP-233 T-23 fell between the retired 60-minute threshold and the current 30-minute threshold",
+      "causeClass": "configuration",
+      "missIds": [
+        "ASOP-233:T-23:2026-07-23T09:20:00Z"
+      ],
+      "cause": "The deployed detection appears still to be running the pre-revision threshold. T-23 was down 38 unscheduled minutes: it qualifies under the configured thresholdMinutes of 30 but not under the 60 minutes recorded in thresholdHistory as revised on 2026-05-14. The platform was nominal and no bypass applied, so a stale threshold value is the only condition consistent with the automation's definition that leaves this candidate unselected.",
+      "evidence": [
+        "ASOP-233 configs: \"thresholdMinutes\": 30, \"thresholdHistory\": [{\"minutes\": 60, \"revisedOn\": \"2026-05-14\"}]",
+        "Row: down_minutes 38 — above 30, below 60 — reason_code \"RC-ALARM\" (unscheduled), \"bypass\": null, \"platform_status\": \"up\"",
+        "status_start 2026-07-23T09:20:00Z / status_end 09:58:00Z falls inside PW-001 (\"up\", \"Nominal.\")",
+        "No other ASOP-233 miss sits in the 30–60 minute band; the other durations are 210, 145 and 130 minutes"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "title": "Engineering holds are backfilled from the engineering queue, so ASOP-341 stayed quiet",
+      "causeClass": "configuration",
+      "missIds": [
+        "ASOP-341:H-3314",
+        "ASOP-341:H-3336"
+      ],
+      "cause": "Both holds carry hold_type = 'engineering', which is ASOP-341's bypass clause: engineering holds are backfilled from the engineering queue rather than dispatched here. ASOP-341 has no window, no threshold and no platform-status join, so timing plays no part for either row; the bypass alone accounts for each.",
+      "evidence": [
+        "ASOP-341 bypass: clause \"hold_type = 'engineering'\", note \"Engineering holds are backfilled from the engineering queue instead. The hold is still unassigned here.\"",
+        "H-3314: \"hold_type\": \"engineering\", \"bypass\": \"hold_type = engineering\", placed_at 2026-07-29T02:55:00Z",
+        "H-3336: \"hold_type\": \"engineering\", \"bypass\": \"hold_type = engineering\", placed_at 2026-07-30T12:53:00Z, released_at null",
+        "ASOP-341 configs: \"thresholdMinutes\": null, \"timePredicate\": \"none\"; \"joinsPlatformStatus\": false"
+      ],
+      "confidence": "high"
+    },
+    {
+      "title": "Material hold H-3359 was placed inside the PW-004 outage and never re-triggered",
+      "causeClass": "infrastructure",
+      "missIds": [
+        "ASOP-341:H-3359"
+      ],
+      "cause": "H-3359 carries no bypass and is a plain unassigned-department hold, so nothing in the automation's definition excuses it. Its only trigger event — the hold insert at 2026-07-29T05:30:00Z — falls inside the PW-004 outage, and the platform is event-driven with no historical replay, so the candidate was lost. Kept separate from the main outage finding because ASOP-341 has joinsPlatformStatus false and the row carries no platform_status attribution; the link rests on placed_at alone, and ASOP-341's \"every row in the table is evaluated\" wording leaves open whether a later evaluation should have picked it up (the hold stayed unassigned until released_at 2026-07-30T01:17:00Z).",
+      "evidence": [
+        "H-3359 row: \"hold_type\": \"material\", \"bypass\": null, placed_at \"2026-07-29T05:30:00Z\", released_at \"2026-07-30T01:17:00Z\"",
+        "PW-004: \"down\", 2026-07-29T02:00:00Z to 2026-07-29T08:00:00Z, \"No replay of missed candidates on recovery.\"",
+        "\"The platform is event-driven and performs no historical replay.\"",
+        "ASOP-341 \"joinsPlatformStatus\": false — the row carries no platform_status field, unlike the eight attributed outage misses"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "title": "Recorded skip reasons suppressed two missed checks",
+      "causeClass": "configuration",
+      "missIds": [
+        "ASOP-402:C-034",
+        "ASOP-402:C-094"
+      ],
+      "cause": "Both checks came due inside the window, the 30-minute grace elapsed, ran_at is absent and both tools are inside the production-bay constriction — but each carries a non-null skip_reason, which is ASOP-402's bypass. The platform was nominal for both, so the recorded skip is the whole explanation for each; as the bypass note says, a reason explains why the check went unrun, it does not make it run.",
+      "evidence": [
+        "ASOP-402 bypass: name \"recorded skip\", clause \"skip_reason IS NOT NULL\", note \"A reason explains why the check went unrun; it does not make it run.\"",
+        "C-034: \"bypass\": \"skip_reason: Operator unavailable on shift\", due_at 2026-07-23T08:07:00Z, minutes_overdue 19673, platform_status \"up\"",
+        "C-094: \"bypass\": \"skip_reason: Superseded by manual check\", due_at 2026-08-01T18:01:00Z, minutes_overdue 6119, platform_status \"up\"",
+        "tool_ids T-10 and T-22 both satisfy the constriction \"tool_id BETWEEN 'T-01' AND 'T-22'\""
+      ],
+      "confidence": "high"
+    },
+    {
+      "title": "Hard-bounce 550 suppressed three retry escalations",
+      "causeClass": "configuration",
+      "missIds": [
+        "ASOP-455:M-0043",
+        "ASOP-455:M-0013",
+        "ASOP-455:M-0027"
+      ],
+      "cause": "All three messages exceeded the attemptCeiling of 3 and were never acknowledged, but each carries bounce_code '550', ASOP-455's hard-bounce bypass: the address is dead so retry escalation was deliberately suppressed. ASOP-455 has timePredicate \"none\" and joinsPlatformStatus false, so platform availability is irrelevant to all three; the bypass accounts for each on its own.",
+      "evidence": [
+        "ASOP-455 bypass: name \"hard bounce\", clause \"bounce_code = '550'\", note \"The address is dead, so retrying cannot succeed and escalation was suppressed. The notification still never arrived.\"",
+        "M-0043: attempts 11, \"bounce_code\": \"550\", \"bypass\": \"bounce_code = 550 (hard bounce)\"",
+        "M-0013: attempts 9, \"bounce_code\": \"550\", \"bypass\": \"bounce_code = 550 (hard bounce)\"",
+        "M-0027: attempts 5, \"bounce_code\": \"550\", \"bypass\": \"bounce_code = 550 (hard bounce)\", queued_at 2026-07-25T01:49:00Z (inside PW-001, \"up\")",
+        "ASOP-455 configs: \"attemptCeiling\": 3, \"timePredicate\": \"none\"; \"joinsPlatformStatus\": false"
+      ],
+      "confidence": "high"
+    },
+    {
+      "title": "Two ASOP-207 deadline warnings unexplained; both had their latest moving event recorded only after the deadline had passed",
+      "causeClass": "unexplained",
+      "missIds": [
+        "ASOP-207:B-8807:S-26:2026-07-28T18:00:00Z",
+        "ASOP-207:B-8814:S-24:2026-07-30T02:15:00Z"
+      ],
+      "cause": "No cause in the bundle accounts for these. Both qualify squarely — latest event is a moving state, minutes_remaining is below the 60-minute warning threshold — ASOP-207 has no constrictions and no bypasses, and both occurred while the platform was nominal. They are grouped only because they share the single distinguishing pattern available: the most recent event for the (batch_id, step_id) was timestamped after queue_deadline had already elapsed (18:18 vs 18:00; 02:24 vs 02:15), i.e. there was no in-window event for an event-driven platform to react to during the countdown. That is a hypothesis the bundle does not confirm, so the misses are recorded as unexplained rather than attributed to a logic gap.",
+      "evidence": [
+        "ASOP-207 configs: \"thresholdMinutesRemaining\": 60, movingStates [\"queued\",\"in_transit\"], position \"latest event per (batch_id, step_id)\"; \"constrictions\": [], \"bypasses\": []",
+        "B-8807: event_type \"in_transit\", event_at \"2026-07-28T18:18:00Z\", queue_deadline \"2026-07-28T18:00:00Z\", minutes_remaining -18, bypass null, platform_status \"up\" (PW-001, \"Nominal.\")",
+        "B-8814: event_type \"in_transit\", event_at \"2026-07-30T02:24:00Z\", queue_deadline \"2026-07-30T02:15:00Z\", minutes_remaining -9, bypass null, platform_status \"up\" (PW-005, \"Nominal.\")",
+        "Neither row is excluded by terminalStates [\"at_risk\",\"expired\"]"
+      ],
+      "confidence": "low"
+    },
+    {
+      "title": "ASOP-402 C-068 unexplained: in scope, grace elapsed, platform nominal, no skip reason",
+      "causeClass": "unexplained",
+      "missIds": [
+        "ASOP-402:C-068"
+      ],
+      "cause": "Nothing in ASOP-402's definition or the availability record accounts for this silence. The check came due inside the window, ran 840 minutes overdue against a 30-minute grace (and would also qualify under the retired 60-minute grace, so threshold drift does not explain it), tool T-20 is inside the production-bay constriction, skip_reason is null and the platform was up throughout PW-007.",
+      "evidence": [
+        "Row: check_id \"C-068\", due_at \"2026-08-05T10:00:00Z\", minutes_overdue 840, \"bypass\": null, \"platform_status\": \"up\"",
+        "ASOP-402 configs: \"graceMinutes\": 30, windowBound \"due_at < analysis end\", thresholdHistory [{\"minutes\": 60, \"revisedOn\": \"2025-11-01\"}] — 840 overdue clears both values",
+        "Constriction \"tool_id BETWEEN 'T-01' AND 'T-22'\": tool_id \"T-20\" is in scope",
+        "PW-007: \"up\", 2026-08-03T00:15:00Z to 2026-08-06T00:00:00Z, \"Nominal.\""
+      ],
+      "confidence": "medium"
+    },
+    {
+      "title": "ASOP-455 M-0062 unexplained: over the ceiling, no hard bounce, platform nominal",
+      "causeClass": "unexplained",
+      "missIds": [
+        "ASOP-455:M-0062"
+      ],
+      "cause": "No supportable cause. M-0062 has attempts 4 against an attemptCeiling of 3, was never acknowledged, and bounce_code is \"timeout\" so the hard-bounce bypass does not apply; ASOP-455 has no time predicate and does not join platform status, so the outage and degraded windows are irrelevant. The only observation worth recording is that 4 is exactly ceiling+1 — the minimum qualifying value, and the lowest attempt count among the four ASOP-455 candidates (11, 9, 5, 4) — which would be consistent with a boundary error in the deployed comparison, but the bundle contains no evidence of how the comparison is written.",
+      "evidence": [
+        "Row: message_id \"M-0062\", attempts 4, \"bounce_code\": \"timeout\", \"bypass\": null, queued_at \"2026-07-23T08:57:00Z\", sent_at \"2026-07-23T09:17:00Z\"",
+        "ASOP-455 configs: \"attemptCeiling\": 3, acknowledgementColumn \"acked_at\", \"timePredicate\": \"none\"",
+        "Bypass clause is \"bounce_code = '550'\"; this row's bounce_code is \"timeout\"",
+        "2026-07-23T08:57:00Z falls inside PW-001 (\"up\", \"Nominal.\"); \"joinsPlatformStatus\": false for ASOP-455"
+      ],
+      "confidence": "low"
+    }
+  ],
+  "notes": "Two data observations that did not rise to findings. (1) The ASOP-118 row for P-114 carries no port_mode column at all (it has \"unit_present\": 0 instead) yet the pass attributed \"bypass\": \"port_mode = maint\"; the maintenance grouping therefore rests on the attribution rather than on a visible port_mode value in that row. (2) All four ASOP-207 rows have \"next_tool_group\": null, including the two explained by the PW-004 outage, so that null does not discriminate the unexplained pair and was not used as a cause. Also noted: PW-002 (2026-07-26T03:30–05:10Z, degraded, \"dispatcher unaffected\") and PW-006 (2026-08-02T23:00–2026-08-03T00:15Z, degraded) contain no misses and explain none.",
+  "score": {
+    "ok": false,
+    "dimensions": {
+      "coverage": {
+        "findings": 11,
+        "covered": 24,
+        "expected": 24,
+        "duplicates": [],
+        "unknown": [],
+        "uncovered": [],
+        "comparable": true,
+        "ok": true
+      },
+      "outage": {
+        "expected": 8,
+        "findingsSpanned": 1,
+        "finding": {
+          "index": 0,
+          "title": "PW-004 unplanned outage (2026-07-29T02:00–08:00Z) with no replay swallowed eight candidates across four automations",
+          "size": 8
+        },
+        "causeClass": "infrastructure",
+        "extras": [],
+        "omissions": [],
+        "unlocated": [],
+        "ok": true
+      },
+      "trap": {
+        "checked": 4,
+        "violations": [
+          {
+            "missId": "ASOP-341:H-3359",
+            "findingIndex": 5,
+            "title": "Material hold H-3359 was placed inside the PW-004 outage and never re-triggered"
+          }
+        ],
+        "ok": false
+      },
+      "coincidental": {
+        "entries": [
+          {
+            "missId": "ASOP-402:C-034",
+            "label": "bypass scoped too broadly",
+            "expectedClass": "configuration",
+            "findingIndex": 6,
+            "size": 2,
+            "sharesWith": [
+              "ASOP-402:C-094"
+            ],
+            "actualClass": "configuration",
+            "ok": false
+          },
+          {
+            "missId": "ASOP-455:M-0062",
+            "label": "criterion narrower than stated",
+            "expectedClass": "logic-gap",
+            "findingIndex": 10,
+            "size": 1,
+            "sharesWith": [],
+            "actualClass": "unexplained",
+            "ok": false
+          },
+          {
+            "missId": "ASOP-233:T-23:2026-07-23T09:20:00Z",
+            "label": "threshold revision never applied",
+            "expectedClass": "configuration",
+            "findingIndex": 3,
+            "size": 1,
+            "sharesWith": [],
+            "actualClass": "configuration",
+            "ok": true
+          }
+        ],
+        "distinctFindings": 3,
+        "expectedFindings": 3,
+        "distinct": true,
+        "ok": false
+      },
+      "standAlone": {
+        "checked": 2,
+        "violations": [],
+        "ok": true
+      }
+    },
+    "failures": [
+      "ASOP-341:H-3359 is attributed to infrastructure (\"Material hold H-3359 was placed inside the PW-004 outage and never re-triggered\") — its detection has no time dimension, so the outage cannot explain it",
+      "ASOP-402:C-034 (bypass scoped too broadly) is grouped with ASOP-402:C-094",
+      "ASOP-455:M-0062 classed unexplained, expected logic-gap (criterion narrower than stated)"
+    ]
+  }
+}

@@ -1,0 +1,856 @@
+{
+  "model": "claude-opus-5",
+  "recordedAt": "2026-10-21T19:18:16.157Z",
+  "usage": {
+    "inputTokens": 46605,
+    "outputTokens": 12542,
+    "elapsedMs": 172694,
+    "calls": 15
+  },
+  "entries": [
+    {
+      "templateId": "TPL-PORT-BLOCKED",
+      "label": "Wiki — ロードポート開放不良 / port will not release (JA/EN)",
+      "expectedAsop": "ASOP-114",
+      "baselineName": "Port Blocked Recovery",
+      "ok": true,
+      "note": "perfect",
+      "sql": "WITH qualifying AS (\n  SELECT\n    h.port_id,\n    h.tool_id,\n    h.state,\n    h.entered_at,\n    h.exited_at,\n    COALESCE(h.exited_at, $end) AS effective_end,\n    (julianday(COALESCE(h.exited_at, $end)) - julianday(h.entered_at)) * 1440 AS dwell_minutes,\n    h.unit_present,\n    h.port_mode\n  FROM port_state_history h\n  WHERE h.state = 'blocked'\n    AND h.entered_at <= $end\n    AND (julianday(COALESCE(h.exited_at, $end)) - julianday(h.entered_at)) * 1440 > 30\n)\nSELECT\n  q.port_id,\n  q.tool_id,\n  q.state,\n  q.entered_at,\n  q.exited_at,\n  q.effective_end,\n  ROUND(q.dwell_minutes, 2) AS dwell_minutes,\n  q.unit_present,\n  q.port_mode,\n  CASE WHEN q.port_mode = 'maint' THEN 'port in maintenance mode' END AS bypass,\n  ps.status AS platform_status,\n  ps.window_id AS platform_window_id\nFROM qualifying q\nLEFT JOIN asop_activity_log l ON l.asop_id = 'ASOP-114'\n  AND json_extract(l.selection_payload, '$.port_id') = q.port_id\n  AND json_extract(l.selection_payload, '$.entered_at') = q.entered_at\nLEFT JOIN platform_status ps ON ps.window_start <= q.entered_at AND ps.window_end > q.entered_at\nWHERE l.log_id IS NULL\nORDER BY q.entered_at, q.port_id",
+      "stages": [
+        {
+          "stage": "resolve",
+          "value": {
+            "asopId": "ASOP-114",
+            "confidence": "high",
+            "quoted_condition": "ポートがブロック状態に入る … そのまま **30分** を超えて滞留した場合に起動する"
+          }
+        },
+        {
+          "stage": "extract",
+          "value": {
+            "table": "port_state_history",
+            "shape": "interval",
+            "qualifyingCondition": "A port_state_history row with state = 'blocked' whose elapsed time in that state (exited_at, or the end of the analysis period if still open, minus entered_at) exceeds 30 minutes.",
+            "thresholdValue": 30,
+            "thresholdUnit": "minutes",
+            "thresholdMeaning": "elapsed-in-state",
+            "timePredicate": "required",
+            "openIntervals": "close-at-analysis-end",
+            "configs": [
+              {
+                "name": "Blocked state",
+                "expression": "state = 'blocked'",
+                "note": "「ポートがブロック状態に入る」 — the automation watches for a load position that has gone into the blocked condition and stayed there."
+              },
+              {
+                "name": "Error states are out of scope",
+                "expression": "state <> 'error'",
+                "note": "「エラーで落ちているポートはこのページの対象外。別運用。」 — a faulted port is a different page with a much shorter fuse; it was never a candidate here."
+              },
+              {
+                "name": "Dwell exceeds threshold",
+                "expression": "(COALESCE(exited_at, analysis_end) - entered_at) > 30 minutes",
+                "note": "「そのまま30分を超えて滞留した場合に起動する」; sub-minute bounces in and out of blocked are normal handshake behaviour."
+              },
+              {
+                "name": "Carrier presence irrelevant",
+                "expression": "unit_present IN (0,1)  -- not filtered",
+                "note": "「キャリアの有無は問わない。空でもブロックはブロック。」"
+              }
+            ],
+            "constrictions": [],
+            "bypasses": [
+              {
+                "name": "Port in maintenance mode",
+                "expression": "port_mode = 'maint'",
+                "note": "「メンテナンスモードに切り替わっているポートには何もしない」 — the block is real, but techs are working on it and we are not the ones who should clear it."
+              }
+            ],
+            "notes": "Threshold was revised: old value 45 minutes (still shown on an outdated Confluence page) superseded by 30 minutes in the 2026-04 review (v4.1); 30 taken. Comparison is strictly greater than 30 minutes as written. Open blocked intervals are measured to the end of the analysis period and still count. Maintenance mode is recorded as a bypass because such a port does qualify as blocked past 30 minutes — the automation simply stands down; error is recorded as a config since an error row is not a blocked row. Ownership/distribution-list remarks are informational only."
+          }
+        },
+        {
+          "stage": "compose",
+          "value": {
+            "sql": "WITH qualifying AS (\n  SELECT\n    h.port_id,\n    h.tool_id,\n    h.state,\n    h.entered_at,\n    h.exited_at,\n    COALESCE(h.exited_at, $end) AS effective_end,\n    (julianday(COALESCE(h.exited_at, $end)) - julianday(h.entered_at)) * 1440 AS dwell_minutes,\n    h.unit_present,\n    h.port_mode\n  FROM port_state_history h\n  WHERE h.state = 'blocked'\n    AND h.entered_at <= $end\n    AND (julianday(COALESCE(h.exited_at, $end)) - julianday(h.entered_at)) * 1440 > 30\n)\nSELECT\n  q.port_id,\n  q.tool_id,\n  q.state,\n  q.entered_at,\n  q.exited_at,\n  q.effective_end,\n  ROUND(q.dwell_minutes, 2) AS dwell_minutes,\n  q.unit_present,\n  q.port_mode,\n  CASE WHEN q.port_mode = 'maint' THEN 'port in maintenance mode' END AS bypass,\n  ps.status AS platform_status,\n  ps.window_id AS platform_window_id\nFROM qualifying q\nLEFT JOIN asop_activity_log l ON l.asop_id = 'ASOP-114'\n  AND json_extract(l.selection_payload, '$.port_id') = q.port_id\n  AND json_extract(l.selection_payload, '$.entered_at') = q.entered_at\nLEFT JOIN platform_status ps ON ps.window_start <= q.entered_at AND ps.window_end > q.entered_at\nWHERE l.log_id IS NULL\nORDER BY q.entered_at, q.port_id",
+            "antiJoinKeys": [
+              "$.port_id",
+              "$.entered_at"
+            ],
+            "usesAnalysisEnd": true,
+            "notes": "Identity keys: port_id + entered_at, the table's primary key, which uniquely pins one interval (tool_id and state in the payload are descriptive, not needed for uniqueness). Open intervals are closed at $end and entered_at <= $end excludes rows starting after the analysis window. state <> 'error' is implied by state = 'blocked'; unit_present is deliberately unfiltered. port_mode = 'maint' is labelled as bypass only, never filtered. platform_status is joined on entered_at, the timestamp that locates the candidate when the condition first arose."
+          }
+        }
+      ],
+      "score": {
+        "asopId": "ASOP-114",
+        "groundTruthError": null,
+        "resolution": {
+          "checks": [
+            {
+              "label": "asopId",
+              "expected": "ASOP-114",
+              "actual": "ASOP-114",
+              "ok": true
+            },
+            {
+              "label": "table",
+              "expected": "port_state_history",
+              "actual": "port_state_history",
+              "ok": true
+            },
+            {
+              "label": "shape",
+              "expected": "interval",
+              "actual": "interval",
+              "ok": true
+            }
+          ],
+          "ok": true
+        },
+        "execution": {
+          "ok": true,
+          "error": null,
+          "rowCount": 3,
+          "columns": [
+            "port_id",
+            "tool_id",
+            "state",
+            "entered_at",
+            "exited_at",
+            "effective_end",
+            "dwell_minutes",
+            "unit_present",
+            "port_mode",
+            "bypass",
+            "platform_status",
+            "platform_window_id"
+          ],
+          "truncated": false,
+          "elapsedMs": 6.155199999993783
+        },
+        "counts": {
+          "expected": 3,
+          "actual": 3,
+          "ok": true
+        },
+        "rows": {
+          "identityColumns": [
+            "port_id",
+            "entered_at"
+          ],
+          "missingColumns": [],
+          "comparable": true,
+          "matched": 3,
+          "extras": [],
+          "omissions": [],
+          "duplicates": [],
+          "attributionComparable": true,
+          "attributionDisagreements": [],
+          "ok": true
+        },
+        "structure": {
+          "checks": [
+            {
+              "name": "outer filter is the anti-join",
+              "ok": true,
+              "detail": "WHERE l.log_id IS NULL"
+            },
+            {
+              "name": "joins asop_activity_log",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "name": "anti-join scoped by asop_id",
+              "ok": true,
+              "detail": "'ASOP-114'"
+            },
+            {
+              "name": "reads selection_payload",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "name": "has a bypass column",
+              "ok": true,
+              "detail": "NULL AS bypass when there are none"
+            },
+            {
+              "name": "bypass \"Port in maintenance mode\" attributed",
+              "ok": true,
+              "detail": "port_mode"
+            },
+            {
+              "name": "bypass \"Port in maintenance mode\" not filtered on",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "name": "baseline bypasses attributed",
+              "ok": true,
+              "detail": "1 declared"
+            }
+          ],
+          "ok": true
+        },
+        "ok": true,
+        "failures": []
+      }
+    },
+    {
+      "templateId": "TPL-PORT-ERROR",
+      "label": "FW: RE: RE: port faults — nobody owns these?",
+      "expectedAsop": "ASOP-118",
+      "baselineName": "Port Error Escalation",
+      "ok": true,
+      "note": "perfect",
+      "sql": "WITH qualifying AS (\n  SELECT\n    p.port_id,\n    p.tool_id,\n    p.state,\n    p.entered_at,\n    p.exited_at,\n    COALESCE(p.exited_at, $end) AS effective_end,\n    p.unit_present,\n    p.port_mode,\n    (julianday(COALESCE(p.exited_at, $end)) - julianday(p.entered_at)) * 1440 AS minutes_in_state\n  FROM port_state_history p\n  WHERE p.state = 'error'\n    AND p.entered_at <= $end\n    AND (julianday(COALESCE(p.exited_at, $end)) - julianday(p.entered_at)) * 1440 >= 15\n)\nSELECT\n  q.port_id,\n  q.tool_id,\n  q.state,\n  q.entered_at,\n  q.exited_at,\n  q.effective_end,\n  ROUND(q.minutes_in_state, 2) AS minutes_in_state,\n  q.unit_present,\n  q.port_mode,\n  CASE WHEN q.exited_at IS NULL THEN 1 ELSE 0 END AS still_open,\n  ps.status AS platform_status_at_entry,\n  ps.window_id AS platform_window_id,\n  CASE WHEN q.port_mode = 'maint' THEN 'position in maintenance mode' END AS bypass\nFROM qualifying q\nLEFT JOIN asop_activity_log l ON l.asop_id = 'ASOP-118'\n  AND json_extract(l.selection_payload, '$.port_id') = q.port_id\n  AND json_extract(l.selection_payload, '$.entered_at') = q.entered_at\nLEFT JOIN platform_status ps ON ps.window_start <= q.entered_at AND ps.window_end > q.entered_at\nWHERE l.log_id IS NULL\nORDER BY q.entered_at, q.port_id",
+      "stages": [
+        {
+          "stage": "resolve",
+          "value": {
+            "asopId": "ASOP-118",
+            "confidence": "high",
+            "quoted_condition": "15 min in the faulted condition and it escalates. Not 30, that's the other one."
+          }
+        },
+        {
+          "stage": "extract",
+          "value": {
+            "table": "port_state_history",
+            "shape": "interval",
+            "qualifyingCondition": "A port row whose state is 'error' has remained in that state for 15 minutes or more, measured from entered_at to exited_at (or to the end of the analysis period if the row is still open). Presence or absence of a unit on the position is irrelevant.",
+            "thresholdValue": 15,
+            "thresholdUnit": "minutes",
+            "thresholdMeaning": "elapsed-in-state",
+            "timePredicate": "required",
+            "openIntervals": "close-at-analysis-end",
+            "configs": [
+              {
+                "name": "Faulted state",
+                "expression": "state = 'error'",
+                "note": "\"The position drops into the error condition and stops responding to the handler entirely. That is what we are escalating on.\""
+              },
+              {
+                "name": "Time in fault reaches threshold",
+                "expression": "COALESCE(exited_at, analysis_end) - entered_at >= 15 minutes",
+                "note": "\"Confirming the number for the automation config: 15 min in the faulted condition and it escalates.\""
+              }
+            ],
+            "constrictions": [],
+            "bypasses": [
+              {
+                "name": "Position in maintenance mode",
+                "expression": "port_mode = 'maint'",
+                "note": "\"if the position has been put into maintenance mode then we stay out of it. The tech owns it at that point and an automated escalation on top of somebody already working the problem just adds noise.\""
+              }
+            ],
+            "notes": "The 30-minute figure in the thread belongs to a different detection (a position that will not hand the unit back) and is explicitly not this one: \"15 min in the faulted condition... Not 30, that's the other one.\" Took 15 minutes as the current/only threshold here. unit_present is explicitly NOT a condition (\"It does not matter whether there is a unit sitting on the position or not\"), so no filter on it. Still-open fault intervals are to be counted and closed at the end of the analysis period per the Shift Lead's request (\"if a position is still faulted when you run the numbers at the end of the month, please count it\"). No department/tool scoping was stated."
+          }
+        },
+        {
+          "stage": "compose",
+          "value": {
+            "sql": "WITH qualifying AS (\n  SELECT\n    p.port_id,\n    p.tool_id,\n    p.state,\n    p.entered_at,\n    p.exited_at,\n    COALESCE(p.exited_at, $end) AS effective_end,\n    p.unit_present,\n    p.port_mode,\n    (julianday(COALESCE(p.exited_at, $end)) - julianday(p.entered_at)) * 1440 AS minutes_in_state\n  FROM port_state_history p\n  WHERE p.state = 'error'\n    AND p.entered_at <= $end\n    AND (julianday(COALESCE(p.exited_at, $end)) - julianday(p.entered_at)) * 1440 >= 15\n)\nSELECT\n  q.port_id,\n  q.tool_id,\n  q.state,\n  q.entered_at,\n  q.exited_at,\n  q.effective_end,\n  ROUND(q.minutes_in_state, 2) AS minutes_in_state,\n  q.unit_present,\n  q.port_mode,\n  CASE WHEN q.exited_at IS NULL THEN 1 ELSE 0 END AS still_open,\n  ps.status AS platform_status_at_entry,\n  ps.window_id AS platform_window_id,\n  CASE WHEN q.port_mode = 'maint' THEN 'position in maintenance mode' END AS bypass\nFROM qualifying q\nLEFT JOIN asop_activity_log l ON l.asop_id = 'ASOP-118'\n  AND json_extract(l.selection_payload, '$.port_id') = q.port_id\n  AND json_extract(l.selection_payload, '$.entered_at') = q.entered_at\nLEFT JOIN platform_status ps ON ps.window_start <= q.entered_at AND ps.window_end > q.entered_at\nWHERE l.log_id IS NULL\nORDER BY q.entered_at, q.port_id",
+            "antiJoinKeys": [
+              "$.port_id",
+              "$.entered_at"
+            ],
+            "usesAnalysisEnd": true,
+            "notes": "Identifier subset is (port_id, entered_at) — the table's primary key and the interval start; tool_id and state are carried in the payload but are not needed to identify a candidate uniquely. Added entered_at <= $end so intervals starting after the analysis window are not counted. Open intervals are closed at $end. unit_present is selected as evidence only, never filtered. port_mode = 'maint' is attributed as a bypass label, not filtered. platform_status is joined on entered_at, the timestamp that locates the candidate in time."
+          }
+        }
+      ],
+      "score": {
+        "asopId": "ASOP-118",
+        "groundTruthError": null,
+        "resolution": {
+          "checks": [
+            {
+              "label": "asopId",
+              "expected": "ASOP-118",
+              "actual": "ASOP-118",
+              "ok": true
+            },
+            {
+              "label": "table",
+              "expected": "port_state_history",
+              "actual": "port_state_history",
+              "ok": true
+            },
+            {
+              "label": "shape",
+              "expected": "interval",
+              "actual": "interval",
+              "ok": true
+            }
+          ],
+          "ok": true
+        },
+        "execution": {
+          "ok": true,
+          "error": null,
+          "rowCount": 1,
+          "columns": [
+            "port_id",
+            "tool_id",
+            "state",
+            "entered_at",
+            "exited_at",
+            "effective_end",
+            "minutes_in_state",
+            "unit_present",
+            "port_mode",
+            "still_open",
+            "platform_status_at_entry",
+            "platform_window_id",
+            "bypass"
+          ],
+          "truncated": false,
+          "elapsedMs": 0.7276000000056229
+        },
+        "counts": {
+          "expected": 1,
+          "actual": 1,
+          "ok": true
+        },
+        "rows": {
+          "identityColumns": [
+            "port_id",
+            "entered_at"
+          ],
+          "missingColumns": [],
+          "comparable": true,
+          "matched": 1,
+          "extras": [],
+          "omissions": [],
+          "duplicates": [],
+          "attributionComparable": true,
+          "attributionDisagreements": [],
+          "ok": true
+        },
+        "structure": {
+          "checks": [
+            {
+              "name": "outer filter is the anti-join",
+              "ok": true,
+              "detail": "WHERE l.log_id IS NULL"
+            },
+            {
+              "name": "joins asop_activity_log",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "name": "anti-join scoped by asop_id",
+              "ok": true,
+              "detail": "'ASOP-118'"
+            },
+            {
+              "name": "reads selection_payload",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "name": "has a bypass column",
+              "ok": true,
+              "detail": "NULL AS bypass when there are none"
+            },
+            {
+              "name": "bypass \"Position in maintenance mode\" attributed",
+              "ok": true,
+              "detail": "port_mode"
+            },
+            {
+              "name": "bypass \"Position in maintenance mode\" not filtered on",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "name": "baseline bypasses attributed",
+              "ok": true,
+              "detail": "1 declared"
+            }
+          ],
+          "ok": true
+        },
+        "ok": true,
+        "failures": []
+      }
+    },
+    {
+      "templateId": "TPL-HOLD-DEPT",
+      "label": "Holds with nobody's name on them (quality wiki stub)",
+      "expectedAsop": "ASOP-341",
+      "baselineName": "Hold Department Backfill",
+      "ok": false,
+      "note": "2 finding(s)",
+      "sql": "WITH qualifying AS (\n  SELECT\n    h.hold_id,\n    h.batch_id,\n    h.dept_code,\n    h.hold_type,\n    h.memo,\n    h.placed_at,\n    h.released_at\n  FROM hold_records h\n  WHERE h.dept_code IS NULL OR TRIM(h.dept_code) = ''\n)\nSELECT\n  q.hold_id,\n  q.batch_id,\n  q.dept_code,\n  q.hold_type,\n  q.memo,\n  q.placed_at,\n  q.released_at,\n  ps.status AS platform_status_at_placement,\n  ps.window_id AS platform_window_id,\n  CASE WHEN q.hold_type = 'engineering' THEN 'engineering-raised hold' END AS bypass\nFROM qualifying q\nLEFT JOIN asop_activity_log l ON l.asop_id = 'ASOP-341'\n  AND json_extract(l.selection_payload, '$.hold_id') = q.hold_id\nLEFT JOIN platform_status ps ON ps.window_start <= q.placed_at AND ps.window_end > q.placed_at\nWHERE l.log_id IS NULL\nORDER BY q.placed_at, q.hold_id",
+      "stages": [
+        {
+          "stage": "resolve",
+          "value": {
+            "asopId": "ASOP-341",
+            "confidence": "high",
+            "quoted_condition": "It walks the holds and picks up every one with an empty owner department, then raises a backfill request against the batch ... has no threshold, no grace period and no window."
+          }
+        },
+        {
+          "stage": "extract",
+          "value": {
+            "table": "hold_records",
+            "shape": "null-check",
+            "qualifyingCondition": "Any hold record whose owner department field is empty (dept_code IS NULL or blank), regardless of when it was placed or whether it has been released.",
+            "thresholdValue": null,
+            "thresholdUnit": "none",
+            "thresholdMeaning": "none",
+            "timePredicate": "none",
+            "openIntervals": "not-applicable",
+            "configs": [
+              {
+                "name": "missing owner department",
+                "expression": "dept_code IS NULL OR TRIM(dept_code) = ''",
+                "note": "\"It walks the holds and picks up every one with an empty owner department\" — a hold with nothing in that field goes into no queue at all."
+              },
+              {
+                "name": "no date restriction",
+                "expression": "(no predicate on placed_at or released_at)",
+                "note": "\"The sweep does not care when the hold was placed, does not care whether it has since been released, and has no threshold, no grace period and no window. Every hold on the books is looked at, every time.\""
+              }
+            ],
+            "constrictions": [],
+            "bypasses": [
+              {
+                "name": "engineering-raised holds",
+                "expression": "hold_type = 'engineering'",
+                "note": "\"Holds raised by engineering are left alone — engineering runs its own backfill off the ECN queue and gets to them first\"; duplicate requests were the original reason for leaving them out. Quality, material and customer holds remain in scope."
+              }
+            ],
+            "notes": "Document is explicit that there is no time element: no threshold, no grace period, no window, and released holds are not excluded — the placed_at/released_at dates appear on the report as context only (\"Do not add a date filter to this. It has been added by mistake twice.\"). Ownership of the page is unresolved (q-systems -> a.ferreira -> p.varghese, with the 2026-01 reshuffle partly reversed); this affects only ownership, not the detection. Referenced attachment holds_no_dept_example.png is missing and contributes nothing. Engineering holds are recorded as a bypass rather than a config because such a hold is still a genuine missing-owner defect; the sweep simply stands down from it."
+          }
+        },
+        {
+          "stage": "compose",
+          "value": {
+            "sql": "WITH qualifying AS (\n  SELECT\n    h.hold_id,\n    h.batch_id,\n    h.dept_code,\n    h.hold_type,\n    h.memo,\n    h.placed_at,\n    h.released_at\n  FROM hold_records h\n  WHERE h.dept_code IS NULL OR TRIM(h.dept_code) = ''\n)\nSELECT\n  q.hold_id,\n  q.batch_id,\n  q.dept_code,\n  q.hold_type,\n  q.memo,\n  q.placed_at,\n  q.released_at,\n  ps.status AS platform_status_at_placement,\n  ps.window_id AS platform_window_id,\n  CASE WHEN q.hold_type = 'engineering' THEN 'engineering-raised hold' END AS bypass\nFROM qualifying q\nLEFT JOIN asop_activity_log l ON l.asop_id = 'ASOP-341'\n  AND json_extract(l.selection_payload, '$.hold_id') = q.hold_id\nLEFT JOIN platform_status ps ON ps.window_start <= q.placed_at AND ps.window_end > q.placed_at\nWHERE l.log_id IS NULL\nORDER BY q.placed_at, q.hold_id",
+            "antiJoinKeys": [
+              "$.hold_id"
+            ],
+            "usesAnalysisEnd": false,
+            "notes": "Null-check shape with no interval, so hold_id alone identifies a candidate exactly; batch_id/dept_code/memo are carried in the payload as context but are not needed (and dept_code is empty by construction) for the anti-join. No $end binding because the spec explicitly has no date predicate, no threshold and no window, and released holds stay in scope. platform_status is still joined on placed_at since every hold record carries that timestamp and it locates the candidate in time for outage attribution. The engineering hold_type bypass is labelled in the SELECT list only and never filtered."
+          }
+        }
+      ],
+      "score": {
+        "asopId": "ASOP-341",
+        "groundTruthError": null,
+        "resolution": {
+          "checks": [
+            {
+              "label": "asopId",
+              "expected": "ASOP-341",
+              "actual": "ASOP-341",
+              "ok": true
+            },
+            {
+              "label": "table",
+              "expected": "hold_records",
+              "actual": "hold_records",
+              "ok": true
+            },
+            {
+              "label": "shape",
+              "expected": "null-check",
+              "actual": "null-check",
+              "ok": true
+            }
+          ],
+          "ok": true
+        },
+        "execution": {
+          "ok": true,
+          "error": null,
+          "rowCount": 6,
+          "columns": [
+            "hold_id",
+            "batch_id",
+            "dept_code",
+            "hold_type",
+            "memo",
+            "placed_at",
+            "released_at",
+            "platform_status_at_placement",
+            "platform_window_id",
+            "bypass"
+          ],
+          "truncated": false,
+          "elapsedMs": 2.4588999999978114
+        },
+        "counts": {
+          "expected": 3,
+          "actual": 6,
+          "ok": false
+        },
+        "rows": {
+          "identityColumns": [
+            "hold_id"
+          ],
+          "missingColumns": [],
+          "comparable": true,
+          "matched": 3,
+          "extras": [
+            "\"H-3364\"",
+            "\"H-3341\"",
+            "\"H-3323\""
+          ],
+          "omissions": [],
+          "duplicates": [],
+          "attributionComparable": true,
+          "attributionDisagreements": [],
+          "ok": false
+        },
+        "structure": {
+          "checks": [
+            {
+              "name": "outer filter is the anti-join",
+              "ok": true,
+              "detail": "WHERE l.log_id IS NULL"
+            },
+            {
+              "name": "joins asop_activity_log",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "name": "anti-join scoped by asop_id",
+              "ok": true,
+              "detail": "'ASOP-341'"
+            },
+            {
+              "name": "reads selection_payload",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "name": "has a bypass column",
+              "ok": true,
+              "detail": "NULL AS bypass when there are none"
+            },
+            {
+              "name": "bypass \"engineering-raised holds\" attributed",
+              "ok": true,
+              "detail": "hold_type"
+            },
+            {
+              "name": "bypass \"engineering-raised holds\" not filtered on",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "name": "baseline bypasses attributed",
+              "ok": true,
+              "detail": "1 declared"
+            }
+          ],
+          "ok": true
+        },
+        "ok": false,
+        "failures": [
+          "returned 6 rows, baseline finds 3",
+          "3 row(s) not in the baseline"
+        ]
+      }
+    },
+    {
+      "templateId": "TPL-CHECK-SWEEP",
+      "label": "Quality Control — checks that never ran (SOP-0402 rev C)",
+      "expectedAsop": "ASOP-402",
+      "baselineName": "Missed Check Sweep",
+      "ok": false,
+      "note": "stopped at compose: sql: more than one statement",
+      "sql": null,
+      "stages": [
+        {
+          "stage": "resolve",
+          "value": {
+            "asopId": "ASOP-402",
+            "confidence": "high",
+            "quoted_condition": "it came due at some point inside the period being reviewed, AND it was never carried out, AND it has been overdue by more than the grace period... the grace period is half an hour"
+          }
+        },
+        {
+          "stage": "extract",
+          "value": {
+            "table": "scheduled_checks",
+            "shape": "absence",
+            "qualifyingCondition": "A scheduled check whose due_at falls within the review period and has already passed, where ran_at was never written (IS NULL), and where the due time is more than 30 minutes in the past.",
+            "thresholdValue": 30,
+            "thresholdUnit": "minutes",
+            "thresholdMeaning": "overdue-past-due",
+            "timePredicate": "required",
+            "openIntervals": "not-applicable",
+            "configs": [
+              {
+                "name": "came due inside the review period and in the past",
+                "expression": "due_at <= analysis_end AND due_at within the reviewed period",
+                "note": "'it came due at some point inside the period being reviewed' — 'a check booked for next Tuesday has obviously not been done yet and is not a defect. Only the ones whose due time has already passed are in scope.'"
+              },
+              {
+                "name": "never carried out",
+                "expression": "ran_at IS NULL",
+                "note": "'it was never carried out' — the sweep reconstructs checks that came due and never happened; the system only writes a record when somebody performs it."
+              },
+              {
+                "name": "grace period exceeded",
+                "expression": "due_at < analysis_end - 30 minutes",
+                "note": "'it has been overdue by more than the grace period... the grace period is half an hour' (rev C)."
+              }
+            ],
+            "constrictions": [
+              {
+                "name": "production bays only",
+                "expression": "tool_id BETWEEN 'T-01' AND 'T-22'",
+                "note": "'The sweep covers the production bays only, which is tools T-01 through T-22.'"
+              },
+              {
+                "name": "pilot-line tools excluded",
+                "expression": "tool_id NOT IN (the two pilot-line tools under the vendor service contract)",
+                "note": "'The two pilot-line tools are not swept by us... the vendor's own field system books and chases their checks.' Tool ids are not given in the document."
+              }
+            ],
+            "bypasses": [
+              {
+                "name": "documented reason for non-performance",
+                "expression": "skip_reason IS NOT NULL",
+                "note": "'Where a reason has been recorded against a check explaining why it was not carried out... the sweep does not chase it. The reason is taken as sufficient and it goes no further.'"
+              }
+            ],
+            "notes": "Threshold was 60 minutes under rev B; rev C (in force) halved it to 30 minutes — older dashboards hard-coding 60 are explicitly called wrong, so 30 is taken. The quantity is time overdue past the due point (due_at), not elapsed-in-state or remaining-until-deadline. The pilot-line tools are described as excluded but no tool ids are given; they are presumably outside T-01..T-22, and both scoping statements are recorded as constrictions. The 'period being reviewed' bound is a sweep window, not stated with explicit dates."
+          }
+        },
+        {
+          "stage": "compose",
+          "value": null
+        }
+      ],
+      "score": null
+    },
+    {
+      "templateId": "TPL-QUEUE-DEADLINE",
+      "label": "Aviso de plazo de cola / batches about to run late (ES/EN)",
+      "expectedAsop": "ASOP-207",
+      "baselineName": "Queue Deadline Warning",
+      "ok": false,
+      "note": "2 finding(s)",
+      "sql": "WITH qualifying AS (\n  SELECT\n    e.batch_id,\n    e.step_id,\n    e.event_type,\n    e.event_at,\n    e.queue_deadline,\n    e.next_tool_group,\n    (julianday(e.queue_deadline) - julianday($end)) * 1440 AS minutes_remaining\n  FROM batch_queue_events e\n  WHERE e.event_at = (\n      SELECT MAX(e2.event_at)\n      FROM batch_queue_events e2\n      WHERE e2.batch_id = e.batch_id\n        AND e2.step_id  = e.step_id\n    )\n    AND (julianday(e.queue_deadline) - julianday($end)) * 1440 < 60\n)\nSELECT\n  q.batch_id,\n  q.step_id,\n  q.event_type,\n  q.event_at,\n  q.queue_deadline,\n  q.next_tool_group,\n  ROUND(q.minutes_remaining, 2) AS minutes_remaining,\n  ps.status AS platform_status_at_event,\n  ps.window_id AS platform_window_id,\n  CASE WHEN q.event_type IN ('at_risk','expired') THEN 'already flagged at risk or expired' END AS bypass\nFROM qualifying q\nLEFT JOIN asop_activity_log l ON l.asop_id = 'ASOP-207'\n  AND json_extract(l.selection_payload, '$.batch_id') = q.batch_id\n  AND json_extract(l.selection_payload, '$.step_id') = q.step_id\n  AND json_extract(l.selection_payload, '$.queue_deadline') = q.queue_deadline\nLEFT JOIN platform_status ps ON ps.window_start <= q.event_at AND ps.window_end > q.event_at\nWHERE l.log_id IS NULL\nORDER BY q.queue_deadline, q.batch_id, q.step_id",
+      "stages": [
+        {
+          "stage": "resolve",
+          "value": {
+            "asopId": "ASOP-207",
+            "confidence": "high",
+            "quoted_condition": "Se avisa cuando a un lote le queda menos de una hora contra el compromiso de su paso actual. --> threshold is 60 minutes remaining."
+          }
+        },
+        {
+          "stage": "extract",
+          "value": {
+            "table": "batch_queue_events",
+            "shape": "countdown",
+            "qualifyingCondition": "For the most recent event row of each (batch_id, step_id) — i.e. the row with MAX(event_at) for that batch at that step — the time remaining from the analysis moment until queue_deadline is less than 60 minutes; the value may be negative (deadline already blown) and such rows still qualify.",
+            "thresholdValue": 60,
+            "thresholdUnit": "minutes",
+            "thresholdMeaning": "remaining-until-deadline",
+            "timePredicate": "required",
+            "openIntervals": "not-applicable",
+            "configs": [
+              {
+                "name": "latest event per batch and step only",
+                "expression": "event_at = (SELECT MAX(e2.event_at) FROM batch_queue_events e2 WHERE e2.batch_id = batch_queue_events.batch_id AND e2.step_id = batch_queue_events.step_id)",
+                "note": "\"hay que mirar el último evento registrado para ese lote en ese paso\" / \"The earlier ones are history — ... gets one warning, not two.\""
+              },
+              {
+                "name": "countdown against the step commitment",
+                "expression": "(julianday(queue_deadline) - julianday('now')) * 1440 < 60",
+                "note": "\"Se avisa cuando a un lote le queda menos de una hora contra el compromiso de su paso actual\" / \"threshold is 60 minutes remaining. Less than that and it warns.\" Explicitly not elapsed time; goes negative."
+              }
+            ],
+            "constrictions": [],
+            "bypasses": [
+              {
+                "name": "already flagged at risk or expired",
+                "expression": "event_type IN ('at_risk','expired')",
+                "note": "\"Si un lote ya ha sido marcado como en riesgo, o ya consta como vencido, la plataforma ya lo sabe y ya está en el tablero de excepciones — avisar otra vez no aporta nada y satura el canal, así que esos dos casos no se avisan por muy pasados de plazo que estén.\" The batch is still (often badly) late; the notice is simply suppressed as duplicate."
+              }
+            ],
+            "notes": "The at_risk/expired carve-out is written as a scope rule (\"solo se avisa de lotes que siguen en movimiento\", i.e. event_type IN ('queued','in_transit')) but its stated reason is that the condition IS met and already known on the exceptions board (\"por muy pasados de plazo que estén\"), so it is recorded as a bypass rather than a config; since event_type has only four allowed values the two readings select the same rows. The document states the threshold twice (\"menos de una hora\" and \"60 minutes remaining\") — same value, no conflict. next_tool_group is carried in the notice but explicitly does not affect the condition. The note \"no hay lista de exenciones\" means no per-batch exemption list exists."
+          }
+        },
+        {
+          "stage": "compose",
+          "value": {
+            "sql": "WITH qualifying AS (\n  SELECT\n    e.batch_id,\n    e.step_id,\n    e.event_type,\n    e.event_at,\n    e.queue_deadline,\n    e.next_tool_group,\n    (julianday(e.queue_deadline) - julianday($end)) * 1440 AS minutes_remaining\n  FROM batch_queue_events e\n  WHERE e.event_at = (\n      SELECT MAX(e2.event_at)\n      FROM batch_queue_events e2\n      WHERE e2.batch_id = e.batch_id\n        AND e2.step_id  = e.step_id\n    )\n    AND (julianday(e.queue_deadline) - julianday($end)) * 1440 < 60\n)\nSELECT\n  q.batch_id,\n  q.step_id,\n  q.event_type,\n  q.event_at,\n  q.queue_deadline,\n  q.next_tool_group,\n  ROUND(q.minutes_remaining, 2) AS minutes_remaining,\n  ps.status AS platform_status_at_event,\n  ps.window_id AS platform_window_id,\n  CASE WHEN q.event_type IN ('at_risk','expired') THEN 'already flagged at risk or expired' END AS bypass\nFROM qualifying q\nLEFT JOIN asop_activity_log l ON l.asop_id = 'ASOP-207'\n  AND json_extract(l.selection_payload, '$.batch_id') = q.batch_id\n  AND json_extract(l.selection_payload, '$.step_id') = q.step_id\n  AND json_extract(l.selection_payload, '$.queue_deadline') = q.queue_deadline\nLEFT JOIN platform_status ps ON ps.window_start <= q.event_at AND ps.window_end > q.event_at\nWHERE l.log_id IS NULL\nORDER BY q.queue_deadline, q.batch_id, q.step_id",
+            "antiJoinKeys": [
+              "$.batch_id",
+              "$.step_id",
+              "$.queue_deadline"
+            ],
+            "usesAnalysisEnd": true,
+            "notes": "The spec's condition literally reads julianday('now'); I bound $end instead, since $end is the analysis moment and 'now' would make the pass non-reproducible. Anti-join keys are all three payload keys: batch_id+step_id identifies the subject, and queue_deadline distinguishes successive countdowns of the same batch at the same step (the latest-event row can change deadline over time). platform_status is joined on event_at, the only timestamp that locates the candidate in time (queue_deadline is a future commitment, not an occurrence). The at_risk/expired carve-out is rendered as the 'bypass' label only and never filters, so badly-late suppressed batches still surface. next_tool_group is carried as evidence but plays no part in qualification."
+          }
+        }
+      ],
+      "score": {
+        "asopId": "ASOP-207",
+        "groundTruthError": null,
+        "resolution": {
+          "checks": [
+            {
+              "label": "asopId",
+              "expected": "ASOP-207",
+              "actual": "ASOP-207",
+              "ok": true
+            },
+            {
+              "label": "table",
+              "expected": "batch_queue_events",
+              "actual": "batch_queue_events",
+              "ok": true
+            },
+            {
+              "label": "shape",
+              "expected": "countdown",
+              "actual": "countdown",
+              "ok": true
+            }
+          ],
+          "ok": true
+        },
+        "execution": {
+          "ok": true,
+          "error": null,
+          "rowCount": 36,
+          "columns": [
+            "batch_id",
+            "step_id",
+            "event_type",
+            "event_at",
+            "queue_deadline",
+            "next_tool_group",
+            "minutes_remaining",
+            "platform_status_at_event",
+            "platform_window_id",
+            "bypass"
+          ],
+          "truncated": false,
+          "elapsedMs": 7.381300000008196
+        },
+        "counts": {
+          "expected": 4,
+          "actual": 36,
+          "ok": false
+        },
+        "rows": {
+          "identityColumns": [
+            "batch_id",
+            "step_id",
+            "queue_deadline"
+          ],
+          "missingColumns": [],
+          "comparable": true,
+          "matched": 4,
+          "extras": [
+            "\"B-8818\" | \"S-28\" | \"2026-07-23T14:14:00Z\"",
+            "\"B-8818\" | \"S-13\" | \"2026-07-23T18:14:00Z\"",
+            "\"B-8801\" | \"S-10\" | \"2026-07-23T18:25:00Z\"",
+            "\"B-8802\" | \"S-11\" | \"2026-07-24T09:54:00Z\"",
+            "\"B-8808\" | \"S-10\" | \"2026-07-24T15:39:00Z\"",
+            "\"B-8820\" | \"S-21\" | \"2026-07-24T20:56:00Z\"",
+            "\"B-8820\" | \"S-15\" | \"2026-07-24T22:54:00Z\"",
+            "\"B-8823\" | \"S-11\" | \"2026-07-25T22:09:00Z\"",
+            "\"B-8813\" | \"S-15\" | \"2026-07-25T23:31:00Z\"",
+            "\"B-8823\" | \"S-24\" | \"2026-07-26T09:38:00Z\"",
+            "\"B-8812\" | \"S-14\" | \"2026-07-27T01:42:00Z\"",
+            "\"B-8819\" | \"S-20\" | \"2026-07-28T00:44:00Z\"",
+            "\"B-8819\" | \"S-14\" | \"2026-07-28T03:12:00Z\"",
+            "\"B-8807\" | \"S-16\" | \"2026-07-28T17:34:00Z\"",
+            "\"B-8804\" | \"S-13\" | \"2026-07-29T01:38:00Z\"",
+            "\"B-8810\" | \"S-12\" | \"2026-07-29T04:34:00Z\"",
+            "\"B-8809\" | \"S-11\" | \"2026-07-29T13:01:00Z\"",
+            "\"B-8811\" | \"S-13\" | \"2026-07-29T21:17:00Z\"",
+            "\"B-8806\" | \"S-15\" | \"2026-07-29T22:31:00Z\"",
+            "\"B-8814\" | \"S-16\" | \"2026-07-30T02:31:00Z\"",
+            "\"B-8816\" | \"S-11\" | \"2026-07-31T00:49:00Z\"",
+            "\"B-8824\" | \"S-12\" | \"2026-07-31T08:34:00Z\"",
+            "\"B-8824\" | \"S-25\" | \"2026-07-31T10:26:00Z\"",
+            "\"B-8805\" | \"S-14\" | \"2026-08-01T05:31:00Z\"",
+            "\"B-8821\" | \"S-16\" | \"2026-08-01T13:00:00Z\"",
+            "\"B-8815\" | \"S-10\" | \"2026-08-01T16:16:00Z\"",
+            "\"B-8821\" | \"S-22\" | \"2026-08-01T19:09:00Z\"",
+            "\"B-8817\" | \"S-27\" | \"2026-08-02T02:13:00Z\"",
+            "\"B-8822\" | \"S-10\" | \"2026-08-02T06:11:00Z\"",
+            "\"B-8817\" | \"S-12\" | \"2026-08-02T07:30:00Z\"",
+            "\"B-8822\" | \"S-23\" | \"2026-08-02T07:34:00Z\"",
+            "\"B-8803\" | \"S-12\" | \"2026-08-02T09:30:00Z\""
+          ],
+          "omissions": [],
+          "duplicates": [],
+          "attributionComparable": true,
+          "attributionDisagreements": [],
+          "ok": false
+        },
+        "structure": {
+          "checks": [
+            {
+              "name": "outer filter is the anti-join",
+              "ok": true,
+              "detail": "WHERE l.log_id IS NULL"
+            },
+            {
+              "name": "joins asop_activity_log",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "name": "anti-join scoped by asop_id",
+              "ok": true,
+              "detail": "'ASOP-207'"
+            },
+            {
+              "name": "reads selection_payload",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "name": "has a bypass column",
+              "ok": true,
+              "detail": "NULL AS bypass when there are none"
+            },
+            {
+              "name": "bypass \"already flagged at risk or expired\" attributed",
+              "ok": true,
+              "detail": "event_type"
+            },
+            {
+              "name": "bypass \"already flagged at risk or expired\" not filtered on",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "name": "baseline bypasses attributed",
+              "ok": true,
+              "detail": "0 declared"
+            }
+          ],
+          "ok": true
+        },
+        "ok": false,
+        "failures": [
+          "returned 36 rows, baseline finds 4",
+          "32 row(s) not in the baseline"
+        ]
+      }
+    }
+  ]
+}

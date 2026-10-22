@@ -1,0 +1,18 @@
+node_modules
+dist
+.DS_Store
+*.local
+.vite
+
+# Never commit an API key. Vite inlines every VITE_-prefixed variable into the
+# bundle, so a key in .env at build time ends up in the published JavaScript.
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+
+# Raw third-party data (UCI SECOM, CC BY 4.0): fetched by ml/real/download_secom.py, never committed
+ml/real/data/
