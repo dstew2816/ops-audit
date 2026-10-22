@@ -7,8 +7,8 @@
 // and the ground truth would be sitting in the module graph of the thing being
 // tested. Same rule as generate-sql.js never importing baselines.js.
 //
-// The first five are the classes CLAUDE.md's scope boundary names — the ones
-// detect.js deliberately does not assign.
+// The first five are the usual causes of a silent miss: infrastructure,
+// configuration, data, logic-gap and detector-error.
 //
 // `unexplained` is the sixth and it is load-bearing rather than a fallback. A
 // layer required to pick one of five causes for every miss will produce one for

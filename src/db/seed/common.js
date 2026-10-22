@@ -1,9 +1,8 @@
 // Shared constants and helpers for the seeders.
 //
-// Every seeder gets its OWN generator instance from its own seed. That is a
-// deliberate departure from src/data/events.js, where a single sequential PRNG
-// stream means any edit to generation order reshuffles the entire dataset.
-// Here, changing the port seeder cannot move a single row in email_queue.
+// Every seeder gets its OWN generator instance from its own seed. With one
+// shared stream, any edit to generation order would reshuffle the entire dataset;
+// here, changing the port seeder cannot move a single row in email_queue.
 
 export const MIN = 60_000;
 export const HOUR = 60 * MIN;

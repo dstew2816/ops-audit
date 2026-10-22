@@ -45,7 +45,7 @@ const SPECIAL_CHECKS = {
   24: { unrun: true, handled: true },
   29: { unrun: true, handled: true, skip: true },
   // Missed AND bypassed: a reason was recorded, which explains the gap and
-  // does not close it. The direct analogue of TKT-14/TKT-15 in src/data/.
+  // does not close it.
   33: { unrun: true, handled: false, skip: true },
   38: { unrun: true, handled: true },
   45: { unrun: true, handled: true },

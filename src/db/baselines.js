@@ -1,9 +1,8 @@
 // Hand-written baseline detection SQL — one complete query per ASOP.
 //
-// This is the ground truth the generation stage gets diffed against, the same
-// way the Generate tab diffs an extracted runbook definition against the
-// configured one. A generated query is judged by whether it finds these misses,
-// not by whether its text matches.
+// This is the ground truth the generation stage gets diffed against. A generated
+// query is judged by whether it finds these misses, not by whether its text
+// matches.
 //
 // EACH QUERY IS THE FULL DETECTION for its ASOP:
 //
@@ -442,7 +441,7 @@ LEFT JOIN asop_activity_log l
 //
 // This query cannot see holds whose dept_code is '' or '   ' rather than NULL.
 // Three of those are in the data. They are the same defect and they are absent
-// from this report by design — the counterpart of SVC-03 in src/data/. Widening
+// from this report by design. Widening
 // this to TRIM(COALESCE(dept_code,'')) = '' would defeat the point.
 
 const ASOP_341_QUALIFYING = `

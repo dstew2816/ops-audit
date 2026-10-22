@@ -2,10 +2,8 @@
 // inside the organisation: written by the people who run the process, for other
 // people who already know how it works.
 //
-// These are NOT the templates in src/data/templates.js. Those describe the
-// original runbooks and feed src/engine/generate.js. These describe ASOPs in
-// the SQL layer and feed src/engine/generate-sql.js, which has to resolve which
-// ASOP a document is about before it can write anything.
+// They feed src/engine/generate-sql.js, which has to resolve which ASOP a
+// document is about before it can write anything.
 //
 // THE HARD RULE
 //

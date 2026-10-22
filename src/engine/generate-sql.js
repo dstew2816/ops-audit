@@ -1,10 +1,8 @@
 // SQL generation layer: process documentation in, executable detection SQL out.
 //
-// The counterpart of generate.js for the SQL data layer. generate.js extracts a
-// small structured definition that an existing detector consumes; this module
-// has to produce the detector itself, because there is no single detector to
-// configure. Six candidate types with six sets of time semantics do not reduce
-// to one parameterised query — see the header of src/db/baselines.js.
+// This module has to produce the detector itself, because there is no single
+// detector to configure. Six candidate types with six sets of time semantics do
+// not reduce to one parameterised query — see the header of src/db/baselines.js.
 //
 // THREE STAGES, THREE SEPARATE FAILURE MODES
 //
@@ -31,7 +29,6 @@
 //
 // THE RESOLVED ID IS THE ANTI-JOIN SCOPE
 //
-// Same point as the runbookId note in generate.js, and it bites harder here.
 // Every anti-join is scoped by asop_id because $.tool_id appears in the port,
 // tool and check payloads and $.batch_id appears in batch and hold payloads —
 // the extracted key alone over-matches. Stage 1 choosing ASOP-118 for a
@@ -64,12 +61,11 @@
 //
 // KEY HANDLING
 //
-// Same key, same rule, same consequences as generate.js — read the security
-// note there. The key is read again here rather than imported so that this
-// module and generate.js stay independently loadable under plain Node: a
-// recording script for either one should not drag the other's fixtures into
-// its module graph. Explicit .js extensions and `import.meta.env?.` are for the
-// same reason.
+// The key is read from import.meta.env, which is empty under plain Node;
+// scripts/gen-check.mjs builds its own client from the shell environment and
+// injects it. Explicit .js extensions and `import.meta.env?.` keep this module
+// loadable under plain Node. See .env.example for why a key must never be present
+// in a build that is published.
 
 import Anthropic from '@anthropic-ai/sdk';
 import { ASOPS, ANALYSIS_END } from '../db/seed/index.js';
@@ -558,7 +554,7 @@ function getClient() {
     client = new Anthropic({
       apiKey: API_KEY,
       // Required for direct browser calls, and safe only because this path runs
-      // in local development. See the security note in generate.js.
+      // in local development. See .env.example.
       dangerouslyAllowBrowser: true,
     });
   }
@@ -666,10 +662,9 @@ export async function callStage(stage, { templateId, userPrompt, recordings = nu
 // Validation
 // -----------------------------------------------------------------------------
 //
-// Structured outputs make the happy path here near-redundant, which is the same
-// reason parseGenerated() exists in generate.js: the check belongs to this app,
-// not to the generation call, and it has to survive a change of schema, model
-// or transport. Stage 3 goes further than shape-checking — it enforces the
+// Structured outputs make the happy path here near-redundant, but the check
+// belongs to this app, not to the generation call, and it has to survive a
+// change of schema, model or transport. Stage 3 goes further than shape-checking — it enforces the
 // house rules the SQL has to follow to mean anything, and those no schema can
 // express.
 
@@ -917,8 +912,7 @@ export function paramsFor(sql, { analysisEnd = ANALYSIS_END_ISO } = {}) {
  * Run all three stages for one template.
  *
  * Never throws. A transport failure and a validation failure both come back as
- * a stopped chain with everything completed so far attached — unlike
- * generate.js, which is a single call where throwing loses nothing. Here the
+ * a stopped chain with everything completed so far attached, because the
  * partial result is most of the diagnosis: knowing that resolution succeeded
  * and extraction picked the wrong table is the finding.
  *

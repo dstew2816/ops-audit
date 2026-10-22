@@ -10,7 +10,7 @@
 //                 the extracted spec, the compose notes
 //
 // Node only. No UI, no component, no fixture. It runs the same three-stage
-// chain the Generate tab runs — src/engine/generate-sql.js, one copy — with a
+// chain the AI Layers tab reports on — src/engine/generate-sql.js, one copy — with a
 // client built from the shell environment, then scores the result with
 // src/engine/score.js against the hand-written baseline for that ASOP.
 //
@@ -27,8 +27,8 @@
 //
 // Read from the environment, never written anywhere. This script prints SQL,
 // counts and model output; none of that contains it. Unlike the browser build
-// there is no inlining problem here — see the key-handling note in
-// src/engine/generate.js for why that constraint exists at all.
+// there is no inlining problem here — see .env.example for why that
+// constraint exists at all.
 
 import fs from 'node:fs';
 import { createRequire } from 'node:module';

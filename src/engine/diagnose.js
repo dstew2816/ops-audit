@@ -1,7 +1,6 @@
 // Diagnosis layer: misses in, findings out.
 //
-// The pass CLAUDE.md's scope boundary defers. detect.js and the baselines in
-// src/db/baselines.js answer "which candidates should have been picked up and
+// The baselines in src/db/baselines.js answer "which candidates should have been picked up and
 // were not". This answers the two questions after that, in order:
 //
 //   1. Which of these misses share a cause at all?
@@ -52,7 +51,7 @@
 //
 // KEY HANDLING
 //
-// Same key, same rule, same consequences as generate.js and generate-sql.js.
+// Same key rule as generate-sql.js; see .env.example.
 // The key is read from import.meta.env here too rather than imported, so this
 // module stays loadable under plain Node; `client` and `call` are injectable
 // for the same reason, and scripts/diagnose-check.mjs supplies both.
