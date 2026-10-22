@@ -11,7 +11,8 @@
     "gen:check": "node scripts/gen-check.mjs",
     "diag:check": "node scripts/diagnose-check.mjs",
     "spc:check": "node scripts/spc-check.mjs",
-    "impact:check": "node scripts/impact-check.mjs"
+    "impact:check": "node scripts/impact-check.mjs",
+    "check": "npm run db:check && npm run spc:check && npm run impact:check && npm run gen:check -- --self-test && npm run diag:check -- --self-test"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",
