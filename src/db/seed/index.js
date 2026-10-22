@@ -10,7 +10,7 @@ import { toolStatusLog } from './tools.js';
 import { holdRecords } from './holds.js';
 import { scheduledChecks } from './checks.js';
 import { emailQueue } from './email.js';
-import { asopActivityLog, allCandidates, ASOPS } from './asopLog.js';
+import { asopActivityLog, allCandidates, ASOPS } from './asop-log.js';
 import { platformStatusWindows } from './platform.js';
 import { stationSpecs, stationMeasurements } from './measurements.js';
 import { stations, stationVisits, stationHandoffs } from './stations.js';
