@@ -151,17 +151,17 @@ export default function RealDataTab() {
   return (
     <div className="space-y-14">
       <section className="max-w-3xl space-y-3">
-        <p className="text-[14px] leading-relaxed text-slate-400">
-          Everything else on this site is synthetic. This tab runs the same ideas on <span className="text-slate-200">real,
-          public data</span>: {d.runs.toLocaleString()} production runs from a semiconductor process, each with {d.sensors} anonymized
-          sensor readings, a pass or fail label and a timestamp. Nothing was tuned on the test period, and every number is
-          shown as it came out. <span className="text-slate-200">The honest result is modest: on this data the charts and models
-          do not show a usable signal.</span> That is a finding, not a bug, and the reasons are below.
+        <p className="text-[15px] leading-[1.75] text-slate-400">
+          Everything else on this site is synthetic. This tab stress-tests the same methods on real, public data:{' '}
+          {d.runs.toLocaleString()} production runs from a semiconductor process, each with {d.sensors} anonymized sensor
+          readings, a pass or fail label and a timestamp. Nothing was tuned on the test period, and every number is shown
+          as it came out. The result is weak: on this data the control charts and the classifiers do not show a usable
+          signal, and the reasons are below.
         </p>
-        <p className="text-[12px] leading-relaxed text-slate-500">
-          Source: {real.source.citation}. Licensed {real.source.license}. The raw files are not stored in this repository;{' '}
-          <span className="font-mono">ml/real/download_secom.py</span> fetches them. The readings of the 8 charted sensors appear here
-          as derived data, credited to the source.
+        <p className="text-[13px] leading-relaxed text-slate-500">
+          Source: {real.source.citation}. Licensed {real.source.license}. The raw files are not stored in this repository, and{' '}
+          <span className="font-mono">ml/real/download_secom.py</span> fetches them. The readings of the 8 charted sensors appear
+          here as derived data, credited to the source.
         </p>
       </section>
 
@@ -185,8 +185,7 @@ export default function RealDataTab() {
         <div>
           <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">1. Statistical process control on real sensors</h2>
           <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-            {spc.selection}. Individuals charts: limits come from the first {spc.baseline_runs} runs and are then held fixed, and the
-            Western Electric and Nelson rules are applied to every later run. Click a row to chart that sensor.
+            {spc.selection}. These are individuals charts, with limits taken from the first {spc.baseline_runs} runs and then held fixed, and the Western Electric and Nelson run rules are applied to every later run. Click a row to chart that sensor.
           </p>
         </div>
         <div className="overflow-x-auto rounded border border-slate-800">
@@ -219,16 +218,16 @@ export default function RealDataTab() {
         <div className="max-w-3xl space-y-3 text-[14px] leading-[1.7] text-slate-400">
           <div className="text-[11px] tracking-wide text-slate-500 uppercase">Reading this</div>
           <p>
-            <span className="text-slate-300">These sensors are not stable processes, even inside the baseline.</span> All eight have
-            signals inside the {spc.baseline_runs} runs used to set the limits ({Math.min(...spc.features.map((f) => f.signals_in_baseline))} to {Math.max(...spc.features.map((f) => f.signals_in_baseline))} each). After the baseline, the spread is up to{' '}
-            {Math.max(...spc.features.map((f) => f.post_sd_over_sigma)).toFixed(1)}× what the limits assume, while the average barely
-            moves (under {Math.ceil(Math.max(...spc.features.map((f) => Math.abs(f.post_mean_shift_in_sigma))) * 10) / 10}σ). Limits built from
-            run-to-run differences are tight when neighbouring runs resemble each other, so the extra spread reads as constant
-            out-of-control. The likely causes are autocorrelation and non-normal readings, which a plain individuals chart does not
-            handle; I did not test that further.
+            The sensors are not stable processes, even inside the baseline. All eight have signals inside the {spc.baseline_runs} runs
+            used to set the limits ({Math.min(...spc.features.map((f) => f.signals_in_baseline))} to {Math.max(...spc.features.map((f) => f.signals_in_baseline))} each).
+            After the baseline, the spread is up to {Math.max(...spc.features.map((f) => f.post_sd_over_sigma)).toFixed(1)} times what the limits
+            assume, while the average barely moves (under {Math.ceil(Math.max(...spc.features.map((f) => Math.abs(f.post_mean_shift_in_sigma))) * 10) / 10} standard
+            deviations). Limits built from run-to-run differences are tight when neighbouring runs resemble each other, so the
+            extra spread shows up as constant out-of-control signals. The likely causes are autocorrelation and non-normal
+            readings, which a plain individuals chart does not handle, and I did not test that further.
           </p>
           <p>
-            <span className="text-slate-300">Capability (Cpk, Ppk) is not reported.</span> {spc.capability.reason}
+            I did not compute the process capability index (Cpk) or the process performance index (Ppk). {spc.capability.reason}
           </p>
         </div>
       </section>
@@ -238,11 +237,12 @@ export default function RealDataTab() {
         <div>
           <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">2. Predicting pass or fail from the sensors</h2>
           <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-            Failures are about {pct(d.fail_rate)} of runs, so accuracy would be meaningless: always guessing pass is {pct(1 - cls.test.fail_rate)} accurate.
-            Scored instead on precision, recall and PR-AUC (average precision; a model with no skill scores about the test-period failure
-            rate, {f3(cls.test.fail_rate)}). {cls.protocol.split}. Tuning: {cls.protocol.tuning}. Threshold: {cls.protocol.threshold}. The
-            test period was used {cls.protocol.test_set_used}. PR-AUC intervals are 95% bootstrap intervals over the {cls.test.runs} test runs,
-            which hold only {cls.test.failures} failures.
+            Failures are about {pct(d.fail_rate)} of runs, so accuracy would say little, since always guessing pass is{' '}
+            {pct(1 - cls.test.fail_rate)} accurate. I scored precision, recall and the area under the precision-recall curve
+            (PR-AUC) instead, and a model with no skill scores about the test-period failure rate, {f3(cls.test.fail_rate)}.{' '}
+            {cls.protocol.split}. Tuning: {cls.protocol.tuning}. Threshold: {cls.protocol.threshold}. The test period was used{' '}
+            {cls.protocol.test_set_used}. PR-AUC intervals are 95% bootstrap intervals over the {cls.test.runs} test runs, which
+            hold only {cls.test.failures} failures.
           </p>
         </div>
         <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
@@ -286,16 +286,18 @@ export default function RealDataTab() {
         <div className="max-w-3xl space-y-3 text-[14px] leading-[1.7] text-slate-400">
           <div className="text-[11px] tracking-wide text-slate-500 uppercase">Reading this</div>
           <p>
-            <span className="text-slate-300">No model clearly beats chance on the later runs.</span> The three models score PR-AUC {f3(cls.models.decision_tree.pr_auc)} to{' '}
-            {f3(cls.models.random_forest.pr_auc)} against {f3(cls.models.majority_class.pr_auc)} for no skill, and every interval includes that floor.
-            The forest, which scored best in cross-validation, caught none of the {cls.test.failures} test failures at its chosen threshold. Logistic regression caught
-            {' '}{cls.models.logistic_regression.at_threshold.tp} of {cls.test.failures} but raised {cls.models.logistic_regression.at_threshold.fp} false alarms (precision {f3(cls.models.logistic_regression.at_threshold.precision)}).
+            No model clearly beats chance on the later runs. The three models score a PR-AUC of {f3(cls.models.decision_tree.pr_auc)} to{' '}
+            {f3(cls.models.random_forest.pr_auc)} against {f3(cls.models.majority_class.pr_auc)} for no skill, and every interval includes that
+            floor. The forest, which scored best in cross-validation, caught none of the {cls.test.failures} test failures at its chosen
+            threshold. Logistic regression caught {cls.models.logistic_regression.at_threshold.tp} of {cls.test.failures} but raised{' '}
+            {cls.models.logistic_regression.at_threshold.fp} false alarms (precision {f3(cls.models.logistic_regression.at_threshold.precision)}).
             The control-chart rule flagged {cls.models.control_chart_rule.at_threshold.flagged_runs} runs and none were failures.
           </p>
           <p>
-            Failures were concentrated early ({d.failures_by_fifth_of_timeline[0]} in the first fifth of the timeline against {d.failures_by_fifth_of_timeline.slice(1).join(', ')} in the rest), so the
-            training period fails more often ({pct(cls.train.fail_rate)}) than the test period ({pct(cls.test.fail_rate)}) and the relationship between sensors and failure
-            may not carry forward. A time split is the honest test of that, and here it says it does not.
+            Failures were concentrated early ({d.failures_by_fifth_of_timeline[0]} in the first fifth of the timeline against{' '}
+            {d.failures_by_fifth_of_timeline.slice(1).join(', ')} in the rest), so the training period fails more often (
+            {pct(cls.train.fail_rate)}) than the test period ({pct(cls.test.fail_rate)}), and the relationship between sensors and
+            failure may not carry forward. The time split is the test of that, and here it shows that it did not.
           </p>
         </div>
       </section>
@@ -341,10 +343,11 @@ export default function RealDataTab() {
         <div className="max-w-3xl space-y-3 text-[14px] leading-[1.7] text-slate-400">
           <div className="text-[11px] tracking-wide text-slate-500 uppercase">Reading this</div>
           <p>
-            <span className="text-slate-300">Only {w5.failures_silent} of {w5.failures} failures went unflagged, but that is not a win.</span> The charts flag{' '}
-            {pct(w5.share_passes_flagged)} of passing runs too, so a flag says almost nothing about failure (lift {w5.lift}×, with the passing runs slightly more
-            likely to be flagged). With a longer look-back everything is flagged. Even on the strictest reading, a signal at the failing run itself,{' '}
-            {pct(w0.share_failures_flagged)} of failures are flagged against {pct(w0.share_passes_flagged)} of passing runs. These charts, as built, do not separate failures from passes.
+            Only {w5.failures_silent} of {w5.failures} failures went unflagged, but that count means little, because the charts also flag{' '}
+            {pct(w5.share_passes_flagged)} of passing runs, so a flag says almost nothing about failure (lift {w5.lift}, with passing
+            runs slightly more likely to be flagged). With a longer look-back, everything is flagged. Even on the strictest reading,
+            a signal at the failing run itself, {pct(w0.share_failures_flagged)} of failures are flagged against{' '}
+            {pct(w0.share_passes_flagged)} of passing runs. As built, these charts do not separate failures from passes.
           </p>
           <p>
             By sensor, a signal at the run itself was equally or less common on failures than on passes for 7 of the 8. Sensor 23 is the exception (13.3% of failures
@@ -409,10 +412,10 @@ export default function RealDataTab() {
       <section className="max-w-3xl text-[14px] leading-[1.7] text-slate-400">
         <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Limitations</h2>
         <ul className="mt-2 list-disc space-y-1 pl-5">
-          <li>The sensors are anonymized, so there is no way to say what any of them measures, and the dataset publishes no specification limits, so capability cannot be computed honestly.</li>
-          <li>There are only {d.failures} failures, {cls.test.failures} of them in the test period. Intervals on every metric are wide, and a different split could rank the models differently.</li>
-          <li>The process was not stable over the {d.days} days, so limits from an early baseline and a model trained on early runs both age badly. That is realistic, and it is why the time split matters.</li>
-          <li>One baseline length ({spc.baseline_runs} runs), one look-back window (declared in advance, with three others shown for sensitivity) and one split were used. None was tuned.</li>
+          <li>The sensors are anonymized, so I cannot say what any of them measures, and the dataset publishes no specification limits, so capability cannot be computed.</li>
+          <li>There are only {d.failures} failures, {cls.test.failures} of them in the test period, so the intervals on every metric are wide and a different split could rank the models differently.</li>
+          <li>The process was not stable over the {d.days} days, so limits from an early baseline and a model trained on early runs both age badly. That is realistic, and it is the reason for the time split.</li>
+          <li>I used one baseline length ({spc.baseline_runs} runs), one look-back window (declared in advance, with three others shown for sensitivity) and one split, and none was tuned.</li>
           <li>A plain individuals chart assumes roughly independent, normal readings. These readings are neither, and I did not try to correct for that.</li>
         </ul>
       </section>
