@@ -135,11 +135,11 @@ export default function MlTab() {
   return (
     <div className="space-y-12">
       <p className="max-w-3xl text-[15px] leading-[1.75] text-slate-400">
-        Task: read a messy procedure definition and work out two things. First the <span className="text-slate-300">kind</span> of
-        check it is ({results.kinds.length} kinds), then the <span className="text-slate-300">specific thing</span> it watches
-        ({d.n_leaves} of them, such as queue time, time since PM, or a hold with no owner). A decision tree learns this from
-        labeled examples; branching keyword rules written by hand try the same task. Both are scored once on the same{' '}
-        {d.n_test} held-out records.
+        The task is to read a messy procedure definition and work out two things: the <span className="text-slate-300">kind</span> of
+        check it is ({results.kinds.length} kinds), and the <span className="text-slate-300">specific thing</span> it watches
+        ({d.n_leaves} of them, such as queue time, time since preventive maintenance (PM), or a hold with no owner). A decision tree
+        learns this from labeled examples, and branching keyword rules written by hand try the same task. Both are scored once on
+        the same {d.n_test} held-out records.
       </p>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -182,7 +182,7 @@ export default function MlTab() {
       <section>
         <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Side by side on the held-out set</h2>
         <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-          Bars are test accuracy; the pale bracket is the 95% interval. Click a row to see it in detail below.
+          Each bar shows test accuracy, and the pale bracket marks the 95% interval. Click a row for its detail below.
         </p>
         <div className="mt-3 overflow-x-auto rounded border border-slate-800">
           <table className="w-full text-[12px]">
@@ -336,9 +336,9 @@ export default function MlTab() {
               {results.hand_rules.join('\n')}
             </pre>
             <p className="mt-2 text-[12px] leading-relaxed text-slate-500">
-              Step one decides the kind of check; step two decides the specific thing inside it. They look only at
-              keywords, so they ignore thresholds and units, and they cannot tell a keyword that is the topic from one
-              mentioned to rule it out.
+              Step one decides the kind of check, and step two decides the specific thing inside it. The rules look only
+              at keywords, so they ignore thresholds and units, and they cannot tell a keyword that is the topic of a
+              definition from one that is mentioned only to rule it out.
             </p>
           </div>
           <div>
@@ -360,10 +360,10 @@ export default function MlTab() {
       <section>
         <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Does any single feature give the answer away?</h2>
         <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-          Thresholds overlap between types and carry noise (some come from an unrelated range entirely), so a number alone
-          is weak evidence. Everything below uses the training set only. The most important feature in the tree
+          Thresholds overlap between types and carry noise, and some come from an unrelated range entirely, so a number
+          alone is weak evidence. Everything below uses the training set only. The most important feature in the tree
           ({results.feature_check.top_importance_feature}) carries {pct(results.feature_check.top_importance_share)} of the
-          importance. Chance on {d.n_leaves} types is {pct(results.feature_check.chance)}.
+          importance, and chance across {d.n_leaves} types is {pct(results.feature_check.chance)}.
         </p>
         <div className="mt-3 grid gap-6 lg:grid-cols-2">
           <div className="overflow-x-auto rounded border border-slate-800">
@@ -408,7 +408,7 @@ export default function MlTab() {
               </tbody>
             </table>
             <p className="px-3 py-2 text-[11px] text-slate-600">
-              Removing the threshold or the condition barely moves it: the model is reading the text, the field name and the entity.
+              Removing the threshold or the condition features barely changes the result, which means the model is reading the text, the field name and the entity.
             </p>
           </div>
         </div>
@@ -443,8 +443,8 @@ export default function MlTab() {
           </table>
         </div>
         <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-          Vague records have a generic title and a vague description, so little text is left to go on. Every method
-          struggles there; the tree falls back on the entity, the field name and the threshold.
+          Vague records have a generic title and description, so there is little text to go on. Every method struggles
+          with them, and the tree falls back on the entity, the field name and the threshold.
         </p>
       </section>
 
@@ -452,9 +452,9 @@ export default function MlTab() {
       <section>
         <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Where the tree and the English hand rules disagree</h2>
         <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-          They differ on {dis.n_differ} of {d.n_test} test records. Tree right, rules wrong: {dis.summary.tree_right_rules_wrong}.
-          Rules right, tree wrong: {dis.summary.rules_right_tree_wrong}. Both wrong: {dis.summary.both_wrong}. A sample of
-          each is below.
+          They differ on {dis.n_differ} of {d.n_test} test records. The tree is right and the rules are wrong on{' '}
+          {dis.summary.tree_right_rules_wrong}, the rules are right and the tree is wrong on {dis.summary.rules_right_tree_wrong},
+          and both are wrong on {dis.summary.both_wrong}. A sample of each kind is below.
         </p>
         <div className="mt-3 overflow-x-auto rounded border border-slate-800">
           <table className="w-full text-[12px]">
@@ -486,33 +486,34 @@ export default function MlTab() {
         </div>
       </section>
 
-      {/* Honest limits ---------------------------------------------------------- */}
+      {/* Limits ---------------------------------------------------------- */}
       <section className="max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">How it was run, and what not to conclude</h2>
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">How it was run, and how far to trust it</h2>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>
             {results.protocol.split}. Tuning: {results.protocol.tuning}. The test set was used {results.protocol.test_set_used}.
-            An earlier, smaller version (30 per type) was run once during development; this version follows a fixed
-            checklist (at least 50 per type, noisier thresholds, a feature check, a full confusion matrix) rather than
-            anything tuned to its test scores, and only this run is reported.
+            An earlier version with 30 records per type was run once during development, and I replaced it with a version
+            that follows a fixed checklist (at least 50 per type, noisier thresholds, a feature check and a full confusion
+            matrix) instead of anything tuned to its test scores. Only the final run is reported.
           </li>
           <li>
-            The data is synthetic: {d.n} generated records ({d.per_leaf} per specific) in English, German, Spanish and
-            Japanese, with {d.vague_records} deliberately vague ones, missing fields and mixed units. The label is known
-            because the generator assigns it first. Many checks have no threshold by design, so that field is often empty.
+            The data is synthetic: {d.n} generated records ({d.per_leaf} for each specific type) in English, German,
+            Spanish and Japanese, including {d.vague_records} deliberately vague ones, with missing fields and mixed units.
+            The generator assigns the label first, so it is known exactly. Many checks have no threshold by design, so
+            that field is often empty.
           </li>
           <li>
-            The taxonomy, the generator, the keyword lists and the hand rules were all written by the same person, so
-            their vocabulary overlaps. Real documents would be harder; treat the accuracy as an upper-leaning estimate.
+            I wrote the taxonomy, the generator, the keyword lists and the hand rules, so their vocabulary overlaps and
+            real documents would be harder. The accuracy is probably an overestimate.
           </li>
           <li>
             Thresholds are noisy and overlap between types, and removing the threshold or condition features barely
-            changes the tree's accuracy (see above), so the result does not rest on a single number. Real documents may
-            still be messier than this generator.
+            changes the tree's accuracy, so the result does not rest on a single number. Real documents may still be
+            messier than this generator.
           </li>
           <li>
-            The forest scores higher than the tree, at the cost of being much harder to read; the tree is the headline
-            because it can be explained rule by rule.
+            The forest scores higher than the tree but is much harder to read, so the tree is the headline: it can be
+            explained rule by rule.
           </li>
         </ul>
       </section>
