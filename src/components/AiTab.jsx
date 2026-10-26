@@ -101,10 +101,9 @@ export default function AiTab() {
   return (
     <div className="space-y-14">
       <p className="max-w-3xl text-[15px] leading-[1.75] text-slate-400">
-        Two language-model layers sit on top of the audit. One turns a messy procedure document into the detection
-        logic that finds its misses. The other groups the misses by root cause. Each is graded against answers
-        written by hand beforehand, and neither result was tuned after seeing scores. Where a layer failed, the failure is
-        shown.
+        Two language-model layers sit on top of the audit. One turns a messy procedure document into the detection query
+        that finds its misses, and the other groups the misses by root cause. Each is graded against answers written by
+        hand beforehand, nothing was tuned after the scores were seen, and the failures are shown where they happened.
       </p>
 
       {/* Layer A ---------------------------------------------------------------- */}
@@ -112,11 +111,12 @@ export default function AiTab() {
         <div>
           <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Layer 1: procedure documents to detection logic</h2>
           <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-            Three separate model calls, on purpose: <span className="text-slate-300">resolve</span> which procedure the
-            document describes, <span className="text-slate-300">extract</span> its condition in terms of the database,
-            then <span className="text-slate-300">compose</span> the SQL. When something goes wrong the split shows which
-            stage caused it. The SQL runs against the same data as the {BASELINES.length} hand-written baseline queries and
-            is scored on resolution, execution, row counts, the actual rows, and structure.
+            The work is split into three separate calls: the first <span className="text-slate-300">resolves</span> which
+            procedure the document describes, the second <span className="text-slate-300">extracts</span> its condition in
+            terms of the database, and the third <span className="text-slate-300">writes</span> the query in SQL (Structured
+            Query Language). When a result is wrong, the split shows which step caused it. The query runs against the same
+            data as the {BASELINES.length} hand-written baseline queries and is scored on resolution, execution, row counts,
+            the rows themselves and structure.
           </p>
         </div>
 
@@ -150,25 +150,24 @@ export default function AiTab() {
             <div className="max-w-3xl space-y-3 text-[14px] leading-[1.7] text-slate-400">
               <div className="text-[11px] tracking-wide text-slate-500 uppercase">Reading this run</div>
               <p>
-                <span className="text-slate-300">Resolution was 5 for 5</span>, including telling apart the two port
-                procedures that share a table and differ only in the state they watch and the wait.
+                The right procedure was resolved for all five documents, including the two port procedures that share a
+                table and differ only in the state they watch and how long they wait.
               </p>
               <p>
-                <span className="text-slate-300">The hold document returned 3 extra rows.</span> They are holds whose
-                department is blank rather than empty (NULL). The generated query checks for both, so it arguably beats
-                the baseline. The baseline stays as written, because a defect the automation misses and a defect its
-                criteria are too narrow to see are different findings.
+                The hold document returned 3 extra rows, which are holds whose department is blank rather than empty
+                (NULL). The generated query checks for both, so it arguably does better than the baseline. I left the
+                baseline as written, because a defect the automation misses and a defect its criteria are too narrow to
+                see are different findings.
               </p>
               <p>
-                <span className="text-slate-300">The queue-deadline document returned 36 rows against 4.</span> The
-                extraction stage measured the countdown from the end of the analysis window instead of from each
-                batch&rsquo;s own latest event, and treated finished states as a bypass instead of excluding them. Both
-                errors appear in the extraction output, before any SQL was written, which is what the three-stage split is
-                for.
+                The queue-deadline document returned 36 rows against 4. The extraction step measured the countdown from the
+                end of the analysis window instead of from each batch&rsquo;s own latest event, and treated finished states as
+                a bypass instead of excluding them. Both errors appear in the extraction output, before any SQL was written,
+                which is the reason for splitting the work into three steps.
               </p>
               <p>
-                <span className="text-slate-300">The missed-check document never produced runnable SQL.</span> The compose
-                stage returned more than one statement, which the guardrail rejects. It was not retried.
+                The missed-check document never produced runnable SQL, because the third step returned more than one
+                statement and the guardrail rejects that. I did not retry it.
               </p>
             </div>
           </>
@@ -182,10 +181,10 @@ export default function AiTab() {
         <div>
           <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Layer 2: grouping misses by root cause</h2>
           <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-            One model call over all 24 misses, the detection definition of each procedure, and the platform's
-            availability record. Detection and diagnosis are separate questions, so a wrong diagnosis never hides a real
-            miss. The data was built to trip a lazy answer: grouping by time alone gets it wrong twice. The answer key
-            has {EXPECTED_FINDINGS.length} findings, written by hand as data rather than rules.
+            One model call covers all 24 misses, the detection definition of each procedure and the platform&rsquo;s
+            availability record. Detection and diagnosis are separate questions, so a wrong diagnosis cannot hide a real
+            miss. The data was built so that grouping by time alone gets it wrong twice. The answer key has{' '}
+            {EXPECTED_FINDINGS.length} findings and is written by hand as data, not as rules.
           </p>
         </div>
 
@@ -221,18 +220,18 @@ export default function AiTab() {
             <div className="max-w-3xl space-y-3 text-[14px] leading-[1.7] text-slate-400">
               <div className="text-[11px] tracking-wide text-slate-500 uppercase">Reading this run</div>
               <p>
-                <span className="text-slate-300">It recovered the outage cluster exactly:</span> the 8 misses across four
-                procedures that fell inside the six-hour outage, classed as infrastructure with one system-level fix.
+                It recovered the outage cluster exactly: the 8 misses across four procedures that fell inside the
+                six-hour outage, classed as infrastructure with one system-level fix.
               </p>
               <p>
-                <span className="text-slate-300">It fell for two of the traps the data was built to test.</span> It
-                blamed the outage for a hold whose detection has no time component, so the outage cannot explain it. And
-                it grouped two missed checks because both had a skip reason recorded, when only one of those skips is the
-                problem. It also called one retry-ceiling miss unexplained where the key calls it a logic gap.
+                It made two of the mistakes the data was built to provoke. It blamed the outage for a hold whose detection
+                has no time component, so the outage cannot explain it, and it grouped two missed checks because both had a
+                skip reason recorded, when only one of those skips is the problem. It also called one retry-ceiling miss
+                unexplained where the key calls it a logic gap.
               </p>
               <p>
-                It was willing to answer &ldquo;unexplained&rdquo; for four misses instead of inventing a cause, which
-                is a real answer (though one of those four is a miss the key does explain).
+                It answered &ldquo;unexplained&rdquo; for four misses instead of inventing a cause, which is a legitimate
+                answer, although one of those four is a miss that the key does explain.
               </p>
             </div>
             <details className="rounded border border-slate-800">
@@ -256,22 +255,24 @@ export default function AiTab() {
       </section>
 
       <section className="max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">How these are graded, and what to conclude</h2>
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">How the grading works</h2>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>
             The baselines and the answer key are written by hand. Rules that separate the planted clusters would be
-            written knowing what was planted, so a model reproducing them would prove nothing.
+            written knowing what was planted, so a model that reproduced them would prove nothing.
           </li>
           <li>
-            Both scorers are tested to fail: <span className="font-mono">gen:check --self-test</span> and{' '}
-            <span className="font-mono">diag:check --self-test</span> feed deliberately wrong answers through and require
-            them to be rejected, including the answer a plain group-by-time would produce.
+            Both scorers are tested with deliberately wrong answers (<span className="font-mono">gen:check --self-test</span> and{' '}
+            <span className="font-mono">diag:check --self-test</span>), which they must reject, including the answer a plain
+            group-by-time would produce.
           </li>
           <li>
-            One run each, on synthetic data with five documents and one diagnosis. That is a demonstration, not a
-            benchmark; a different run could score differently, and the prompts were not tuned toward the answers. One change was made before this run: the first stage originally asked the model to explain its reasoning, which the API intermittently refused, so it now asks for a quote from the document instead. Nothing was changed after seeing scores.
+            Each layer was run once, on five documents and one diagnosis, so this is a demonstration of the method and a
+            different run could score differently. One change was made before the recorded run: the first step originally
+            asked the model to explain its reasoning, the API intermittently refused that, and it now asks for a quote from
+            the document instead. Nothing was changed after the scores were seen.
           </li>
-          <li>The model can write detection logic that finds more than the baseline. That is reported as a finding about the baseline's criteria, not hidden as an error.</li>
+          <li>When the model writes a query that finds more than the baseline, I report that as a finding about the baseline&rsquo;s criteria instead of treating it as an error.</li>
         </ul>
       </section>
     </div>
