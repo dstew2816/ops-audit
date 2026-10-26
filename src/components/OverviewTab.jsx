@@ -69,8 +69,8 @@ function AuditDiagram() {
         </div>
       </div>
       <figcaption className="mt-2 text-[12px] leading-relaxed text-slate-500">
-        Two independent sources go in. The audit does not rely on the automation&rsquo;s log to say what it missed, since the
-        missed cases are the ones that never reached it.
+        Two independent sources go in, and the audit does not rely on the automation&rsquo;s log to say what it missed, since
+        the missed cases are the ones that never reached it.
       </figcaption>
     </figure>
   );

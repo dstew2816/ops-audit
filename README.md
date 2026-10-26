@@ -20,7 +20,7 @@ An automated procedure watches for a condition and reacts to it: a conveyor stop
 - **Statistical process control (SPC).** Control charts for each station, with limits set from an early baseline and then held fixed, plus a chart of the gap between two stations that should agree.
 - **An impact model.** Each miss becomes labor hours and cost at risk, using assumptions you can edit, and the fixes are ranked.
 - **A machine learning (ML) classifier.** It reads messy procedure definitions and says which of 33 kinds of check each one is. Hand-written rules, frozen before training, are the comparison.
-- **Two AI layers.** One writes the detection query from a process document, in three separate calls so a failure can be traced to a step. The other groups misses by root cause.
+- **Two AI layers.** One writes the detection query from a process document, in three separate calls so a failure can be traced to a step, and the other groups misses by root cause.
 - **A stress test on real data.** The same SPC and classification methods, run on a public semiconductor dataset (SECOM).
 
 ## What I found
