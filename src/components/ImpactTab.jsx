@@ -78,10 +78,9 @@ export default function ImpactTab() {
   return (
     <div className="space-y-12">
       <p className="max-w-3xl text-[15px] leading-[1.75] text-slate-400">
-        Each detected miss is converted into labor hours (the manual work to find and recover it) and
-        cost at risk (that labor plus the chance it caused real downstream cost). Every number below
-        is an assumption on synthetic data, set low on purpose. Change any of them and the page
-        recomputes.
+        Each detected miss is converted into labor hours, meaning the manual work to find and recover it, and into
+        cost at risk, which is that labor plus the chance that the miss caused real downstream cost. Every input is an
+        assumption on synthetic data and is set low, and the figures update as you change them.
       </p>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -114,9 +113,8 @@ export default function ImpactTab() {
           </div>
         </div>
         <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-          One row per fix. Fixes group the misses that share a cause, taken from the hand-written
-          diagnosis (the answer key). Payback is how many weeks of avoided cost repay the engineering
-          effort to build the fix.
+          Each row is one fix, covering the misses that share a cause according to the hand-written diagnosis.
+          Payback is the number of weeks of avoided cost it takes to repay the engineering effort of building the fix.
         </p>
         <div className="mt-3 overflow-x-auto rounded border border-slate-800">
           <table className="w-full text-[12px]">
@@ -183,10 +181,9 @@ export default function ImpactTab() {
               onChange={(v) => set({ bypassWeight: v })}
             />
             <p className="pt-2 text-[11px] leading-relaxed text-slate-600">
-              A bypassed miss is one where a recorded exception (such as a port in maintenance mode)
-              explains why nothing fired. Counting it at half weight is the conservative middle:
-              someone may have meant the automation to stand down, but the case was still never
-              picked up.
+              A bypassed miss is one where a recorded exception, such as a port in maintenance mode, explains
+              why nothing fired. Counting it at half weight sits between ignoring it and counting it fully:
+              someone may have meant the automation to stand down, but the case was still never picked up.
             </p>
             <h3 className="pt-3 text-[11px] tracking-wide text-slate-500 uppercase">Fix effort by cause (hours)</h3>
             {Object.keys(a.fixEffortHours).map((cls) => (
@@ -240,19 +237,19 @@ export default function ImpactTab() {
       </section>
 
       <section className="max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">How to read this, and its limits</h2>
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">How the cost is calculated</h2>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>
-            Per miss: hours = manual hours x weight; cost at risk = hours x labor rate + chance x
-            consequence x weight.
+            For each miss, hours are the manual hours times the weight, and cost at risk is hours times the labor
+            rate plus the chance of real cost times the consequence times the weight.
           </li>
-          <li>The inputs are illustrative, not measured. The structure is the point; real numbers would come from a labor log and a cost ledger.</li>
+          <li>The inputs are illustrative. A real version would take them from a labor log and a cost ledger.</li>
           <li>
-            The annualised figure assumes these 14 days are representative. Two weeks of synthetic data
-            cannot support a forecast, so treat it as a scale check.
+            The annualised figure assumes these 14 days are representative, and two weeks of synthetic data cannot
+            support a forecast, so read it as a check on scale.
           </li>
           <li>
-            Cost at risk is not the same as realised loss. With a {Math.round(a.impactProbability * 100)}%
+            Cost at risk is an expected value under these assumptions. With a {Math.round(a.impactProbability * 100)}%
             chance of real damage, most misses cost only their recovery labor.
           </li>
         </ul>

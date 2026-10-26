@@ -68,9 +68,9 @@ export default function NetworkTab() {
   return (
     <div className="space-y-12">
       <p className="max-w-3xl text-[15px] leading-[1.75] text-slate-400">
-        Batches move through six stages. Process runs on two parallel lanes that do the
-        same job, so any batch takes one or the other. Dwell is time spent at a station;
-        a handoff gap is the time between leaving one station and arriving at the next.
+        Batches move through six stages. The Process stage runs on two parallel lanes that do the same job, so each
+        batch takes one or the other. Dwell is the time a batch spends at a station, and a handoff gap is the time
+        between leaving one station and arriving at the next.
       </p>
 
       <section>

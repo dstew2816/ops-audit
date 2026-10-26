@@ -94,11 +94,10 @@ export default function AuditTab() {
   return (
     <div className="space-y-12">
       <p className="max-w-3xl text-[15px] leading-[1.75] text-slate-400">
-        A real SQLite database, built in the browser with sql.js from the seed
-        rows in <span className="font-mono text-slate-400">src/db/</span>. Every
-        number below is computed by SQLite at page load: the coverage counts come
-        from each ASOP&rsquo;s own coverage query and the miss rows from its
-        detection query. Nothing here is precomputed.
+        This is a real SQLite database, built in the browser with sql.js from the seed rows in{' '}
+        <span className="font-mono text-slate-300">src/db/</span>. Every number below is computed by SQLite when the
+        page loads, from the coverage query and the detection query of each automated standard operating
+        procedure (ASOP), and nothing is precomputed.
       </p>
 
       {/* Tables ------------------------------------------------------------ */}
