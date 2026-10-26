@@ -40,7 +40,7 @@ export default function App() {
           <div>
             <h1 className="text-lg font-semibold tracking-tight text-slate-100">OpsAudit</h1>
             <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-slate-500">
-              An independent audit of operations automation: what it missed, what that costs, and what to fix first.
+              An audit of automated procedures that looks for the cases they never picked up.
             </p>
           </div>
           <dl className="flex gap-6 pb-1 text-[11px] tracking-wide text-slate-500 uppercase">
