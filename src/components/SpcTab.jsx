@@ -74,19 +74,19 @@ export default function SpcTab() {
   return (
     <div className="space-y-12">
       <p className="max-w-3xl text-[15px] leading-[1.75] text-slate-400">
-        Each station is measured on cycle time in subgroups of five consecutive units. A control
-        chart draws the range of ordinary variation; a point or pattern outside it means something
-        changed. Control limits come from the first {BASELINE} subgroups, assumed healthy, and are
-        held fixed after that. Capability is a separate question: it compares the process with the
-        spec limits.
+        Each station is measured on cycle time, in subgroups of five consecutive units. A control chart draws the
+        range of ordinary variation, so a point or pattern outside it suggests that something changed. The control
+        limits come from the first {BASELINE} subgroups, which I assume were healthy, and are held fixed afterward.
+        Capability is a separate question, because it compares the process with the specification limits.
       </p>
 
       {/* Capability --------------------------------------------------------- */}
       <section>
         <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Process capability</h2>
         <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-          Cpk uses short-term noise (within-subgroup). Ppk uses all the variation, drift included. A
-          Cpk well above Ppk means the process is capable when stable but did not stay stable.
+          The process capability index (Cpk) uses the short-term noise within each subgroup, and the process
+          performance index (Ppk) uses all of the variation, drift included. When Cpk is well above Ppk, the process
+          is capable while stable but did not stay stable.
         </p>
         <div className="mt-3 overflow-x-auto rounded border border-slate-800">
           <table className="w-full text-[12px]">
@@ -194,7 +194,7 @@ export default function SpcTab() {
           )}
         </div>
         <p className="mt-2 text-[11px] text-slate-600">
-          Red points are alerts. Zone lines mark 1 and 2 sigma. Hover a point for its subgroup and time.
+          Red points are alerts. The zone lines mark 1 and 2 standard deviations (sigma). Hover a point for its subgroup and time.
         </p>
       </section>
 
@@ -202,12 +202,12 @@ export default function SpcTab() {
       <section>
         <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Cross-station drift: lane A vs lane B</h2>
         <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-          The two Process lanes do the same job, so their subgroup means should move together. This
-          chart tracks the difference (B minus A). It learns what normal looks like from the first{' '}
-          {drift.baseline} subgroups, then applies the same rules.{' '}
+          The two Process lanes do the same job, so their subgroup means should move together. This chart tracks the
+          difference between them (lane B minus lane A), learns what normal looks like from the first{' '}
+          {drift.baseline} subgroups, and then applies the same rules.{' '}
           {drift.firstAlert === null
             ? 'No divergence flagged.'
-            : `First divergence alert at subgroup ${drift.firstAlert}; by the end B runs about ${fmt(drift.recentMeanGap, 1)} minutes above its normal gap to A.`}
+            : `The first divergence alert comes at subgroup ${drift.firstAlert}, and by the end lane B runs about ${fmt(drift.recentMeanGap, 1)} minutes above its normal gap to lane A.`}
         </p>
         <div className="mt-3 max-w-3xl">
           <ControlChart
