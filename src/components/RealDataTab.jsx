@@ -1,4 +1,4 @@
-// Real-data validation on the public UCI SECOM dataset. The page only displays
+// Real-data stress test on the public UCI SECOM dataset. The page only displays
 // ml/real/results/secom_results.json, produced by ml/real/secom_analysis.py.
 // Every number is shown as it came out, including the weak ones.
 

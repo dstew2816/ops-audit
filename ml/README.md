@@ -36,7 +36,7 @@ The tree's 95% interval on the specific type is 75.8% to 83.5%. Its cross-valida
 
 ---
 
-# Real-data validation: UCI SECOM (`ml/real/`)
+# Real-data stress test: UCI SECOM (`ml/real/`)
 
 The synthetic work above is only as convincing as the data it is built on, so this part runs the same ideas on **real, public data**.
 

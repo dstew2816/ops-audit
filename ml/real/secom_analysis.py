@@ -1,4 +1,4 @@
-"""Real-data validation on the UCI SECOM dataset.
+"""Real-data stress test on the UCI SECOM dataset.
 
     python -I ml/real/secom_analysis.py [path/to/secom]
 
