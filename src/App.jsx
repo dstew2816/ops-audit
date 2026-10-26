@@ -36,7 +36,7 @@ export default function App() {
   return (
     <div className="min-h-screen">
       <header className="border-b border-slate-800 bg-slate-900/40">
-        <div className="mx-auto flex max-w-[1400px] flex-wrap items-end justify-between gap-4 px-6 pt-6 pb-0">
+        <div className="mx-auto flex max-w-[1200px] flex-wrap items-end justify-between gap-4 px-6 pt-6 pb-0">
           <div>
             <h1 className="text-lg font-semibold tracking-tight text-slate-100">OpsAudit</h1>
             <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-slate-500">
@@ -58,12 +58,12 @@ export default function App() {
             </div>
           </dl>
         </div>
-        <div className="mx-auto max-w-[1400px] overflow-x-auto px-6">
+        <div className="mx-auto max-w-[1200px] overflow-x-auto px-6">
           <TabBar tabs={TABS} active={tab} onChange={go} />
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1400px] px-6 py-6">
+      <main className="mx-auto max-w-[1200px] px-6 py-6">
         {tab === 'overview' && <OverviewTab onNavigate={go} />}
         {tab === 'audit' && <AuditTab />}
         {tab === 'network' && <NetworkTab />}

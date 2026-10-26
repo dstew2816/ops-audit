@@ -72,8 +72,8 @@ export default function SpcTab() {
   const driftLabels = drift.diff.map((_, i) => `Subgroup ${i}`);
 
   return (
-    <div className="space-y-8">
-      <p className="max-w-3xl text-[13px] leading-relaxed text-slate-500">
+    <div className="space-y-12">
+      <p className="max-w-3xl text-[15px] leading-[1.75] text-slate-400">
         Each station is measured on cycle time in subgroups of five consecutive units. A control
         chart draws the range of ordinary variation; a point or pattern outside it means something
         changed. Control limits come from the first {BASELINE} subgroups, assumed healthy, and are
@@ -83,8 +83,8 @@ export default function SpcTab() {
 
       {/* Capability --------------------------------------------------------- */}
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">Process capability</h2>
-        <p className="mt-1 max-w-3xl text-[12px] text-slate-500">
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Process capability</h2>
+        <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
           Cpk uses short-term noise (within-subgroup). Ppk uses all the variation, drift included. A
           Cpk well above Ppk means the process is capable when stable but did not stay stable.
         </p>
@@ -127,7 +127,7 @@ export default function SpcTab() {
       {/* Charts ------------------------------------------------------------- */}
       <section>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-[13px] font-semibold text-slate-200">
+          <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">
             Control charts <span className="ml-1 font-mono text-[11px] text-slate-500">{station}</span>
           </h2>
           <div className="flex gap-1 text-[12px]">
@@ -200,8 +200,8 @@ export default function SpcTab() {
 
       {/* Drift --------------------------------------------------------------- */}
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">Cross-station drift: lane A vs lane B</h2>
-        <p className="mt-1 max-w-3xl text-[12px] text-slate-500">
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Cross-station drift: lane A vs lane B</h2>
+        <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
           The two Process lanes do the same job, so their subgroup means should move together. This
           chart tracks the difference (B minus A). It learns what normal looks like from the first{' '}
           {drift.baseline} subgroups, then applies the same rules.{' '}
@@ -226,7 +226,7 @@ export default function SpcTab() {
 
       {/* Alerts -------------------------------------------------------------- */}
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">
           Alerts <span className="ml-1 font-mono text-[11px] text-slate-500">{alerts.length}</span>
         </h2>
         <div className="mt-3 max-h-80 overflow-auto rounded border border-slate-800">

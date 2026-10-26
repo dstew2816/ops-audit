@@ -133,8 +133,8 @@ export default function MlTab() {
   const dis = results.disagreements;
 
   return (
-    <div className="space-y-8">
-      <p className="max-w-3xl text-[13px] leading-relaxed text-slate-500">
+    <div className="space-y-12">
+      <p className="max-w-3xl text-[15px] leading-[1.75] text-slate-400">
         Task: read a messy procedure definition and work out two things. First the <span className="text-slate-300">kind</span> of
         check it is ({results.kinds.length} kinds), then the <span className="text-slate-300">specific thing</span> it watches
         ({d.n_leaves} of them, such as queue time, time since PM, or a hold with no owner). A decision tree learns this from
@@ -159,7 +159,7 @@ export default function MlTab() {
 
       {/* Taxonomy ---------------------------------------------------------------- */}
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">What it is classifying</h2>
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">What it is classifying</h2>
         <div className="mt-3 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {results.kinds.map((k) => (
             <div key={k} className="rounded border border-slate-800 bg-slate-900/40 p-3">
@@ -180,8 +180,8 @@ export default function MlTab() {
 
       {/* Side by side ---------------------------------------------------------- */}
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">Side by side on the held-out set</h2>
-        <p className="mt-1 max-w-3xl text-[12px] text-slate-500">
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Side by side on the held-out set</h2>
+        <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
           Bars are test accuracy; the pale bracket is the 95% interval. Click a row to see it in detail below.
         </p>
         <div className="mt-3 overflow-x-auto rounded border border-slate-800">
@@ -236,7 +236,7 @@ export default function MlTab() {
 
       {/* Detail ------------------------------------------------------------------ */}
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">
           Detail: {MODELS.find((x) => x.id === selected).label}
         </h2>
         <div className="mt-3 grid gap-6 lg:grid-cols-2">
@@ -328,7 +328,7 @@ export default function MlTab() {
 
       {/* Learned vs hand rules ------------------------------------------------- */}
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">Learned rules vs hand rules</h2>
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Learned rules vs hand rules</h2>
         <div className="mt-3 grid gap-6 lg:grid-cols-2">
           <div>
             <h3 className="text-[11px] tracking-wide text-slate-500 uppercase">Hand-written branching rules (frozen before training)</h3>
@@ -358,8 +358,8 @@ export default function MlTab() {
 
       {/* Feature check ---------------------------------------------------------- */}
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">Does any single feature give the answer away?</h2>
-        <p className="mt-1 max-w-3xl text-[12px] leading-relaxed text-slate-500">
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Does any single feature give the answer away?</h2>
+        <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
           Thresholds overlap between types and carry noise (some come from an unrelated range entirely), so a number alone
           is weak evidence. Everything below uses the training set only. The most important feature in the tree
           ({results.feature_check.top_importance_feature}) carries {pct(results.feature_check.top_importance_share)} of the
@@ -416,7 +416,7 @@ export default function MlTab() {
 
       {/* Where it works --------------------------------------------------------- */}
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">Where each method works and fails</h2>
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Where each method works and fails</h2>
         <div className="mt-3 overflow-x-auto rounded border border-slate-800">
           <table className="w-full text-[12px]">
             <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
@@ -442,7 +442,7 @@ export default function MlTab() {
             </tbody>
           </table>
         </div>
-        <p className="mt-2 max-w-3xl text-[12px] leading-relaxed text-slate-500">
+        <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
           Vague records have a generic title and a vague description, so little text is left to go on. Every method
           struggles there; the tree falls back on the entity, the field name and the threshold.
         </p>
@@ -450,8 +450,8 @@ export default function MlTab() {
 
       {/* Disagreements --------------------------------------------------------- */}
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">Where the tree and the English hand rules disagree</h2>
-        <p className="mt-1 max-w-3xl text-[12px] text-slate-500">
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Where the tree and the English hand rules disagree</h2>
+        <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
           They differ on {dis.n_differ} of {d.n_test} test records. Tree right, rules wrong: {dis.summary.tree_right_rules_wrong}.
           Rules right, tree wrong: {dis.summary.rules_right_tree_wrong}. Both wrong: {dis.summary.both_wrong}. A sample of
           each is below.
@@ -487,8 +487,8 @@ export default function MlTab() {
       </section>
 
       {/* Honest limits ---------------------------------------------------------- */}
-      <section className="max-w-3xl text-[12px] leading-relaxed text-slate-500">
-        <h2 className="text-[13px] font-semibold text-slate-200">How it was run, and what not to conclude</h2>
+      <section className="max-w-3xl text-[14px] leading-[1.7] text-slate-400">
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">How it was run, and what not to conclude</h2>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>
             {results.protocol.split}. Tuning: {results.protocol.tuning}. The test set was used {results.protocol.test_set_used}.

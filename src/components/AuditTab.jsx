@@ -92,8 +92,8 @@ export default function AuditTab() {
   );
 
   return (
-    <div className="space-y-8">
-      <p className="max-w-3xl text-[13px] leading-relaxed text-slate-500">
+    <div className="space-y-12">
+      <p className="max-w-3xl text-[15px] leading-[1.75] text-slate-400">
         A real SQLite database, built in the browser with sql.js from the seed
         rows in <span className="font-mono text-slate-400">src/db/</span>. Every
         number below is computed by SQLite at page load: the coverage counts come
@@ -103,7 +103,7 @@ export default function AuditTab() {
 
       {/* Tables ------------------------------------------------------------ */}
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">
           Tables <span className="ml-1 font-mono text-[11px] text-slate-500">{tables.length}</span>
         </h2>
         <div className="mt-3 overflow-hidden rounded border border-slate-800">
@@ -142,7 +142,7 @@ export default function AuditTab() {
 
       {/* Coverage per ASOP -------------------------------------------------- */}
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">
           Detection coverage
           <span className="ml-2 font-mono text-[11px] font-normal text-slate-500">
             {totals.missed} missed of {totals.qualifying} ·{' '}
@@ -200,10 +200,10 @@ export default function AuditTab() {
 
       {/* Selected ASOP ------------------------------------------------------ */}
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">
           {baseline.asopId} <span className="font-normal text-slate-400">{baseline.name}</span>
         </h2>
-        <p className="mt-1 max-w-3xl text-[12px] leading-relaxed text-slate-500">
+        <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
           {baseline.condition}
         </p>
 

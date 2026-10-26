@@ -66,15 +66,15 @@ export default function NetworkTab() {
   }));
 
   return (
-    <div className="space-y-8">
-      <p className="max-w-3xl text-[13px] leading-relaxed text-slate-500">
+    <div className="space-y-12">
+      <p className="max-w-3xl text-[15px] leading-[1.75] text-slate-400">
         Batches move through six stages. Process runs on two parallel lanes that do the
         same job, so any batch takes one or the other. Dwell is time spent at a station;
         a handoff gap is the time between leaving one station and arriving at the next.
       </p>
 
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">Route</h2>
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Route</h2>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {stages.map((stage, index) => (
             <div key={stage.seq} className="flex items-center gap-2">
@@ -91,7 +91,7 @@ export default function NetworkTab() {
       </section>
 
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">Dwell by station (minutes)</h2>
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Dwell by station (minutes)</h2>
         <div className="mt-3 overflow-hidden rounded border border-slate-800">
           <table className="w-full text-[12px]">
             <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
@@ -122,7 +122,7 @@ export default function NetworkTab() {
       </section>
 
       <section>
-        <h2 className="text-[13px] font-semibold text-slate-200">Handoff gaps (minutes)</h2>
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Handoff gaps (minutes)</h2>
         <div className="mt-3 overflow-hidden rounded border border-slate-800">
           <table className="w-full text-[12px]">
             <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">

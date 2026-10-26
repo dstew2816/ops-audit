@@ -11,7 +11,7 @@ export default function TabBar({ tabs, active, onChange, counts = {} }) {
             onClick={() => onChange(tab.id)}
             aria-current={isActive ? 'page' : undefined}
             className={[
-              'flex items-center gap-2 border-b-2 px-4 py-2.5 text-[13px] font-medium transition-colors',
+              'flex items-center gap-2 border-b-2 px-4 py-2.5 text-[14px] font-medium transition-colors',
               isActive
                 ? 'border-sky-400 text-slate-100'
                 : 'border-transparent text-slate-500 hover:border-slate-700 hover:text-slate-300',

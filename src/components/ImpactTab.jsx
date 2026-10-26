@@ -76,8 +76,8 @@ export default function ImpactTab() {
   const changed = JSON.stringify(a) !== JSON.stringify(DEFAULT_ASSUMPTIONS);
 
   return (
-    <div className="space-y-8">
-      <p className="max-w-3xl text-[13px] leading-relaxed text-slate-500">
+    <div className="space-y-12">
+      <p className="max-w-3xl text-[15px] leading-[1.75] text-slate-400">
         Each detected miss is converted into labor hours (the manual work to find and recover it) and
         cost at risk (that labor plus the chance it caused real downstream cost). Every number below
         is an assumption on synthetic data, set low on purpose. Change any of them and the page
@@ -98,7 +98,7 @@ export default function ImpactTab() {
       {/* Fix queue ------------------------------------------------------------ */}
       <section>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-[13px] font-semibold text-slate-200">Fix queue</h2>
+          <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Fix queue</h2>
           <div className="flex items-center gap-1 text-[12px]">
             <span className="mr-1 text-slate-500">Rank by</span>
             {Object.entries(SORTS).map(([id, s]) => (
@@ -113,7 +113,7 @@ export default function ImpactTab() {
             ))}
           </div>
         </div>
-        <p className="mt-1 max-w-3xl text-[12px] text-slate-500">
+        <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
           One row per fix. Fixes group the misses that share a cause, taken from the hand-written
           diagnosis (the answer key). Payback is how many weeks of avoided cost repay the engineering
           effort to build the fix.
@@ -155,7 +155,7 @@ export default function ImpactTab() {
       {/* Assumptions ----------------------------------------------------------- */}
       <section>
         <div className="flex items-center justify-between">
-          <h2 className="text-[13px] font-semibold text-slate-200">Assumptions</h2>
+          <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Assumptions</h2>
           <button
             type="button"
             disabled={!changed}
@@ -239,8 +239,8 @@ export default function ImpactTab() {
         </div>
       </section>
 
-      <section className="max-w-3xl text-[12px] leading-relaxed text-slate-500">
-        <h2 className="text-[13px] font-semibold text-slate-200">How to read this, and its limits</h2>
+      <section className="max-w-3xl text-[14px] leading-[1.7] text-slate-400">
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">How to read this, and its limits</h2>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>
             Per miss: hours = manual hours x weight; cost at risk = hours x labor rate + chance x

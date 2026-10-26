@@ -99,8 +99,8 @@ export default function AiTab() {
   const dimsPassed = diag ? DIAG_DIMENSIONS.filter(([key]) => diag.dimensions?.[key]?.ok).length : 0;
 
   return (
-    <div className="space-y-10">
-      <p className="max-w-3xl text-[13px] leading-relaxed text-slate-500">
+    <div className="space-y-14">
+      <p className="max-w-3xl text-[15px] leading-[1.75] text-slate-400">
         Two language-model layers sit on top of the audit. One turns a messy procedure document into the detection
         logic that finds its misses. The other groups the misses by root cause. Each is graded against answers
         written by hand beforehand, and neither result was tuned after seeing scores. Where a layer failed, the failure is
@@ -110,8 +110,8 @@ export default function AiTab() {
       {/* Layer A ---------------------------------------------------------------- */}
       <section className="space-y-3">
         <div>
-          <h2 className="text-[14px] font-semibold text-slate-100">Layer 1: procedure documents to detection logic</h2>
-          <p className="mt-1 max-w-3xl text-[12px] leading-relaxed text-slate-500">
+          <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Layer 1: procedure documents to detection logic</h2>
+          <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
             Three separate model calls, on purpose: <span className="text-slate-300">resolve</span> which procedure the
             document describes, <span className="text-slate-300">extract</span> its condition in terms of the database,
             then <span className="text-slate-300">compose</span> the SQL. When something goes wrong the split shows which
@@ -147,7 +147,7 @@ export default function AiTab() {
               </table>
             </div>
             <p className="text-[11px] text-slate-600">Click a row for the generated SQL and what differed from the baseline.</p>
-            <div className="max-w-3xl space-y-1.5 text-[12px] leading-relaxed text-slate-500">
+            <div className="max-w-3xl space-y-3 text-[14px] leading-[1.7] text-slate-400">
               <div className="text-[11px] tracking-wide text-slate-500 uppercase">Reading this run</div>
               <p>
                 <span className="text-slate-300">Resolution was 5 for 5</span>, including telling apart the two port
@@ -180,8 +180,8 @@ export default function AiTab() {
       {/* Layer B ---------------------------------------------------------------- */}
       <section className="space-y-3">
         <div>
-          <h2 className="text-[14px] font-semibold text-slate-100">Layer 2: grouping misses by root cause</h2>
-          <p className="mt-1 max-w-3xl text-[12px] leading-relaxed text-slate-500">
+          <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Layer 2: grouping misses by root cause</h2>
+          <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
             One model call over all 24 misses, the detection definition of each procedure, and the platform's
             availability record. Detection and diagnosis are separate questions, so a wrong diagnosis never hides a real
             miss. The data was built to trip a lazy answer: grouping by time alone gets it wrong twice. The answer key
@@ -218,7 +218,7 @@ export default function AiTab() {
                 </ul>
               </div>
             )}
-            <div className="max-w-3xl space-y-1.5 text-[12px] leading-relaxed text-slate-500">
+            <div className="max-w-3xl space-y-3 text-[14px] leading-[1.7] text-slate-400">
               <div className="text-[11px] tracking-wide text-slate-500 uppercase">Reading this run</div>
               <p>
                 <span className="text-slate-300">It recovered the outage cluster exactly:</span> the 8 misses across four
@@ -255,8 +255,8 @@ export default function AiTab() {
         )}
       </section>
 
-      <section className="max-w-3xl text-[12px] leading-relaxed text-slate-500">
-        <h2 className="text-[13px] font-semibold text-slate-200">How these are graded, and what to conclude</h2>
+      <section className="max-w-3xl text-[14px] leading-[1.7] text-slate-400">
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">How these are graded, and what to conclude</h2>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>
             The baselines and the answer key are written by hand. Rules that separate the planted clusters would be

@@ -149,7 +149,7 @@ export default function RealDataTab() {
   const w0 = bridge.windows['0'].after_baseline;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-14">
       <section className="max-w-3xl space-y-3">
         <p className="text-[14px] leading-relaxed text-slate-400">
           Everything else on this site is synthetic. This tab runs the same ideas on <span className="text-slate-200">real,
@@ -183,8 +183,8 @@ export default function RealDataTab() {
       {/* SPC ------------------------------------------------------------------ */}
       <section className="space-y-3">
         <div>
-          <h2 className="text-[14px] font-semibold text-slate-100">1. Statistical process control on real sensors</h2>
-          <p className="mt-1 max-w-3xl text-[12px] leading-relaxed text-slate-500">
+          <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">1. Statistical process control on real sensors</h2>
+          <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
             {spc.selection}. Individuals charts: limits come from the first {spc.baseline_runs} runs and are then held fixed, and the
             Western Electric and Nelson rules are applied to every later run. Click a row to chart that sensor.
           </p>
@@ -216,7 +216,7 @@ export default function RealDataTab() {
           </table>
         </div>
         <SensorChart feature={feature} />
-        <div className="max-w-3xl space-y-1.5 text-[12px] leading-relaxed text-slate-500">
+        <div className="max-w-3xl space-y-3 text-[14px] leading-[1.7] text-slate-400">
           <div className="text-[11px] tracking-wide text-slate-500 uppercase">Reading this</div>
           <p>
             <span className="text-slate-300">These sensors are not stable processes, even inside the baseline.</span> All eight have
@@ -236,8 +236,8 @@ export default function RealDataTab() {
       {/* Classification --------------------------------------------------------- */}
       <section className="space-y-3">
         <div>
-          <h2 className="text-[14px] font-semibold text-slate-100">2. Predicting pass or fail from the sensors</h2>
-          <p className="mt-1 max-w-3xl text-[12px] leading-relaxed text-slate-500">
+          <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">2. Predicting pass or fail from the sensors</h2>
+          <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
             Failures are about {pct(d.fail_rate)} of runs, so accuracy would be meaningless: always guessing pass is {pct(1 - cls.test.fail_rate)} accurate.
             Scored instead on precision, recall and PR-AUC (average precision; a model with no skill scores about the test-period failure
             rate, {f3(cls.test.fail_rate)}). {cls.protocol.split}. Tuning: {cls.protocol.tuning}. Threshold: {cls.protocol.threshold}. The
@@ -283,7 +283,7 @@ export default function RealDataTab() {
           </div>
           <PrChart />
         </div>
-        <div className="max-w-3xl space-y-1.5 text-[12px] leading-relaxed text-slate-500">
+        <div className="max-w-3xl space-y-3 text-[14px] leading-[1.7] text-slate-400">
           <div className="text-[11px] tracking-wide text-slate-500 uppercase">Reading this</div>
           <p>
             <span className="text-slate-300">No model clearly beats chance on the later runs.</span> The three models score PR-AUC {f3(cls.models.decision_tree.pr_auc)} to{' '}
@@ -303,8 +303,8 @@ export default function RealDataTab() {
       {/* Bridge ------------------------------------------------------------------ */}
       <section className="space-y-3">
         <div>
-          <h2 className="text-[14px] font-semibold text-slate-100">3. Bridge to the audit: signals before failures, and silent failures</h2>
-          <p className="mt-1 max-w-3xl text-[12px] leading-relaxed text-slate-500">
+          <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">3. Bridge to the audit: signals before failures, and silent failures</h2>
+          <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
             This is the real-data version of the audit's silent-miss idea: which failures did no control chart flag? {bridge.definition}.
             Only runs after the baseline are counted, since the baseline is where the limits were fitted.
           </p>
@@ -338,7 +338,7 @@ export default function RealDataTab() {
             </tbody>
           </table>
         </div>
-        <div className="max-w-3xl space-y-1.5 text-[12px] leading-relaxed text-slate-500">
+        <div className="max-w-3xl space-y-3 text-[14px] leading-[1.7] text-slate-400">
           <div className="text-[11px] tracking-wide text-slate-500 uppercase">Reading this</div>
           <p>
             <span className="text-slate-300">Only {w5.failures_silent} of {w5.failures} failures went unflagged, but that is not a win.</span> The charts flag{' '}
@@ -406,8 +406,8 @@ export default function RealDataTab() {
       </section>
 
       {/* Limits ------------------------------------------------------------------ */}
-      <section className="max-w-3xl text-[12px] leading-relaxed text-slate-500">
-        <h2 className="text-[13px] font-semibold text-slate-200">Limitations</h2>
+      <section className="max-w-3xl text-[14px] leading-[1.7] text-slate-400">
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Limitations</h2>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>The sensors are anonymized, so there is no way to say what any of them measures, and the dataset publishes no specification limits, so capability cannot be computed honestly.</li>
           <li>There are only {d.failures} failures, {cls.test.failures} of them in the test period. Intervals on every metric are wide, and a different split could rank the models differently.</li>
