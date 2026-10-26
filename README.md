@@ -65,4 +65,4 @@ In practice the hard part is access to the automation's own log, not the detecti
 
 ## Credits
 
-Real-data stress test: McCann, M. & Johnston, A. (2008). SECOM [Dataset]. University of California, Irvine (UCI) Machine Learning Repository. https://doi.org/10.24432/C54305. Licensed under Creative Commons Attribution 4.0 (CC BY 4.0); the raw files are not committed. Built with JavaScript, React, Vite and SQLite (sql.js) for the site, Python (pandas, scikit-learn) for the ML work, and Claude for the two AI layers. [ARCHITECTURE.md](ARCHITECTURE.md) describes how the modules fit together.
+Real-data stress test: McCann, M. & Johnston, A. (2008). SECOM [Dataset]. University of California, Irvine (UCI) Machine Learning Repository. https://doi.org/10.24432/C54305. Licensed under Creative Commons Attribution 4.0 (CC BY 4.0); the raw files are not committed. Built with JavaScript, React, Vite and SQLite (sql.js) for the site, Python (pandas, scikit-learn) for the ML work, and Claude for the two AI layers. [ARCHITECTURE.md](ARCHITECTURE.md) describes how the modules fit together, and [DECISIONS.md](DECISIONS.md) explains why I made the main choices.
