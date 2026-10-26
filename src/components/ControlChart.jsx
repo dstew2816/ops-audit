@@ -3,7 +3,6 @@
 
 const fmt = (value, digits = 2) => Number(value).toFixed(digits);
 
-/** One control chart as inline SVG: points, centre line, limits, sigma zones. */
 export default function ControlChart({ title, values, cl, ucl, lcl, sigma, hits = [], baseline = null, labels = [] }) {
   const W = 720;
   const H = 230;
