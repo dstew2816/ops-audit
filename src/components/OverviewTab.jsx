@@ -9,7 +9,7 @@ import { EXPECTED_FINDINGS } from '../db/expected-findings.js';
 import { SEED_ROWS } from '../db/seed/index.js';
 import { loadCoverage, loadMissRecords } from '../impact/misses.js';
 import { DEFAULT_ASSUMPTIONS, estimateImpact, rankQueue } from '../impact/impact.js';
-import { BASELINE, analyzeStation, pairDrift } from '../spc/spc.js';
+import { BASELINE, analyzeStation } from '../spc/spc.js';
 import { DRIFT_START } from '../db/seed/measurements.js';
 import ControlChart from './ControlChart.jsx';
 import ml from '../../ml/results/results.json';
@@ -85,12 +85,10 @@ export default function OverviewTab({ onNavigate }) {
         SEED_ROWS.station_measurements.filter((r) => r.station_id === id),
         SEED_ROWS.station_specs.find((s) => s.station_id === id),
       );
-    const a = run('ST-3A');
     const b = run('ST-3B');
     return {
       analysis: b,
       firstAlert: b.xbarHits[0]?.index,
-      pairAlert: pairDrift(a.chart.means, b.chart.means).firstAlert,
     };
   }, []);
 
@@ -160,9 +158,9 @@ export default function OverviewTab({ onNavigate }) {
             detail={`Random forest naming one of ${ml.dataset.n_leaves} kinds of check, versus ${pct(m.rules_multi.leaf_accuracy)} for hand-written rules, on ${ml.dataset.n_test} held-out records`}
           />
           <Kpi
-            value={`Subgroup ${spc.firstAlert}`}
-            label="drift caught"
-            detail={`A planted drift started at subgroup ${DRIFT_START}. Control limits were fixed from an early baseline.`}
+            value={`${spc.firstAlert - DRIFT_START} subgroups`}
+            label="to catch a planted drift"
+            detail={`The drift began at subgroup ${DRIFT_START} and the first alert fired at subgroup ${spc.firstAlert}, with limits fixed from an early baseline.`}
           />
         </div>
       </section>
@@ -232,8 +230,8 @@ export default function OverviewTab({ onNavigate }) {
         <h2 className={H2}>Catching drift with control charts</h2>
         <p className="text-[15px] leading-[1.7] text-slate-300">
           I planted a slow drift in one of two parallel stations. With limits set from an early baseline and then held fixed,
-          the chart alerts <B>{spc.firstAlert - DRIFT_START} subgroups</B> after the drift starts, and a chart on the gap
-          between the two stations catches it at subgroup {spc.pairAlert}.
+          the chart alerts <B>{spc.firstAlert - DRIFT_START} subgroups</B> after the drift starts: it began at subgroup{' '}
+          {DRIFT_START} and the first alert fired at subgroup {spc.firstAlert}.
         </p>
         <ControlChart
           title="Planted drift: station ST-3B, average cycle time per subgroup of five (minutes)"
