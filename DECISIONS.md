@@ -12,11 +12,11 @@ These are the main choices I made on OpsAudit. Each one says what the situation 
 
 ## 2. Control limits come from an early baseline and are then held fixed
 
-**Context.** My first version of the control charts set the limits from all of the data, and when I planted a slow drift it pulled the centre line toward itself, which made the early healthy points look abnormal and the drift look weaker than it really was.
+**Context.** A control chart needs limits that describe how the process behaves when it is healthy. If the limits are calculated from all of the data, a drift that is present in the data pulls the centre line toward itself and widens the limits, so the drift is partly absorbed and looks weaker than it is.
 
-**Decision.** I now set the limits from an early stretch of data that I assume was healthy, the first 15 subgroups in the synthetic data and the first 300 runs in the real data, and I keep them fixed after that, so anything that changes later shows up as a signal instead of being absorbed into the limits.
+**Decision.** I set the limits from an early stretch of data that I assume was healthy, the first 15 subgroups in the synthetic data and the first 300 runs in the real data, and I keep them fixed after that, so anything that changes later shows up as a signal instead of being absorbed into the limits.
 
-**Alternatives I turned down.** Limits from all the data hide a drift, and limits that keep updating absorb slow changes. I also considered more sensitive charts like the exponentially weighted moving average (EWMA) and the cumulative sum (CUSUM), but they are harder to explain and I wanted rules that a coworker could follow. The cost showed up on the real data, where the baseline itself wasn't stable, which is why those charts flag so many runs, and I report that instead of hiding it.
+**Alternatives I turned down.** Calculating the limits from all of the data lets a drift hide itself, and limits that keep updating would absorb slow changes in the same way. The cost of fixed limits showed up on the real data, where all 8 sensors already had signals inside the 300-run baseline, so the limits flag between 3.9% and 48.0% of later runs depending on the sensor, and I report that as it came out.
 
 ## 3. The hand-written rules were frozen before any model was trained
 
