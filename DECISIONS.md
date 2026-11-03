@@ -36,8 +36,8 @@ These are the main choices I made on OpsAudit. Each one says what the situation 
 
 ## 5. Results are reported as they came out, including the weak ones
 
-**Context.** On the real data the control charts flag almost every run and no classifier clearly beat chance, and the AI layers made mistakes in the run I recorded. I also never expected a large effect, because operations already run acceptably without looking at silent misses, although from the work I did they matter more than they seem to, judging by the time and cost they saved.
+**Context.** On the real data the control charts flag almost every run and no classifier clearly beat chance, and the AI layers made mistakes in the run I recorded. The synthetic results are much stronger, but I designed that data, so they say little about how the methods would do on real documents.
 
-**Decision.** I report every number the way it came out, with intervals and with what limits it, because I fixed my choices before looking at results and didn't tune on the test data, and if it works then it works and if it doesn't then I say so.
+**Decision.** I report every number the way it came out, with confidence intervals where I computed them and a note on what limits each result. I fixed my choices before looking at results and did not tune on the test data, so a weak result is something to report plainly and not something to fix.
 
-**Alternatives I turned down.** I could have tuned until the numbers looked better, left out the real-data check, or shown only the synthetic results, which are strong because I designed the data.
+**Alternatives I turned down.** I could have tuned until the numbers looked better, left out the real-data check, or shown only the synthetic results, but each of those would have given a reader a more flattering picture than the evidence supports.
