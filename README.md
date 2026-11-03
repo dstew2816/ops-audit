@@ -16,24 +16,24 @@ An automated procedure watches for a condition and reacts to it: a conveyor stop
 
 ## What I built
 
-- **An audit.** Seven database queries, one per procedure, rebuild the cases that should have triggered it and look for them in its log.
-- **Statistical process control (SPC).** Control charts for each station, with limits set from an early baseline and then held fixed, plus a chart of the gap between two stations that should agree.
-- **An impact model.** Each miss becomes labor hours and cost at risk, using assumptions you can edit, and the fixes are ranked.
-- **A machine learning (ML) classifier.** It reads messy procedure definitions and says which of 33 kinds of check each one is. Hand-written rules, frozen before training, are the comparison.
-- **Two AI layers.** One writes the detection query from a process document, in three separate calls so a failure can be traced to a step, and the other groups misses by root cause.
-- **A stress test on real data.** The same SPC and classification methods, run on a public semiconductor dataset (SECOM).
+- An audit made of seven database queries, one per procedure, each of which rebuilds the cases that should have triggered the procedure and looks for them in its log.
+- Statistical process control (SPC) charts for each station, with limits set from an early baseline and then held fixed, plus a chart of the gap between two stations that should agree.
+- An impact model that turns each miss into labor hours and cost at risk, using assumptions you can edit, and then ranks the fixes.
+- A machine learning (ML) classifier that reads messy procedure definitions and says which of 33 kinds of check each one is, with hand-written rules that were frozen before training as the comparison.
+- Two AI layers, one of which writes the detection query from a process document in three separate calls so that a failure can be traced to a step, while the other groups misses by root cause.
+- A stress test on real data, which runs the same SPC and classification methods on a public semiconductor dataset (SECOM).
 
 ## What I found
 
 Of 92 cases that should have triggered a procedure, 24 were never picked up (26.1%). Under deliberately low assumptions that is about 17.6 labor hours and $3,618 at risk over 14 days, and a backfill after one platform outage covers about half of it.
 
-A drift I planted in one station raised an alert three subgroups after it began. On 413 held-out definitions, the random forest names the specific check (one of 33) correctly 89.1% of the time and the decision tree 79.9%, against 56.4% to 66.3% for the hand-written rules. The AI layers had mixed results in a single recorded run: the first resolved the right procedure for all five documents but matched the hand-written query exactly on two, and the second recovered the outage cluster exactly but passed three of its five checks.
+A drift I planted in one station raised an alert three subgroups after it began. On 413 held-out definitions, the random forest names the specific check (one of 33) correctly 89.1% of the time and the decision tree 79.9%, against 56.4% (English keywords) and 66.3% (multilingual keywords) for the hand-written rules. The AI layers had mixed results in a single recorded run: the first resolved the right procedure for all five documents but matched the hand-written query exactly on two, and the second recovered the outage cluster exactly but passed three of its five checks.
 
 The stress test on real data was weak. 95.0% of failing runs were flagged by the control charts, but so were 98.8% of passing runs, and no classifier clearly beat chance (precision-recall area under the curve of 0.06 to 0.07, against 0.055 for no skill, with 26 failures in the test period). The sensors were already unstable inside the baseline window, and a plain individuals chart assumes independent, normally distributed readings. I did not correct for that.
 
 ## Limitations
 
-I built the synthetic data and wrote the answer keys, so the classifier's accuracy probably overstates what real documents would give. Every sample is small, each AI layer was run once, and the dollar figures come from assumptions I chose. [ml/README.md](ml/README.md) and the tabs on the site give the details.
+I built the synthetic data and wrote the answer keys, so the classifier's accuracy probably overstates what real documents would give. Every sample is small, each AI layer was run once, and the dollar figures come from assumptions I chose. [ml/README.md](ml/README.md) and the views on the site give the details.
 
 ## Run it
 

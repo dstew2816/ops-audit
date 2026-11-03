@@ -4,7 +4,7 @@ These are the main choices I made on OpsAudit. Each one says what the situation 
 
 ## 1. Synthetic data for the audit, and a public real dataset as a stress test
 
-**Context.** I can't copy any data from TSMC, and I couldn't find a public dataset that has both things an audit like this needs, which are the raw events showing that something happened and the automation's own record of what it did. Building the data myself let me plant the kinds of failures that are commonly misunderstood or missed, with the right answers known in advance, so I could show how the audit finds them. The catch is that I'm the one who built the data, so what it shows could be biased by how I built it.
+**Context.** I can't use any data from my internship, and I couldn't find a public dataset that has both things an audit like this needs, which are the raw events showing that something happened and the automation's own record of what it did. Building the data myself let me plant the kinds of failures that are commonly misunderstood or missed, with the right answers known in advance, so I could show how the audit finds them. The catch is that I'm the one who built the data, so what it shows could be biased by how I built it.
 
 **Decision.** I used synthetic data for the audit itself and ran the control chart and classification methods on a real public dataset, the SECOM data from the University of California, Irvine, to see how they behave on data that I didn't create and couldn't shape.
 
@@ -12,11 +12,11 @@ These are the main choices I made on OpsAudit. Each one says what the situation 
 
 ## 2. Control limits come from an early baseline and are then held fixed
 
-**Context.** My first version of the control charts set the limits from all of the data, and when I planted a slow drift it pulled the centre line toward itself, which made the early healthy points look abnormal and the drift look weaker than it really was.
+**Context.** A control chart needs limits that describe how the process behaves when it is healthy. If the limits are calculated from all of the data, a drift that is present in the data pulls the center line toward itself and widens the limits, so the drift is partly absorbed and looks weaker than it is.
 
-**Decision.** I now set the limits from an early stretch of data that I assume was healthy, the first 15 subgroups in the synthetic data and the first 300 runs in the real data, and I keep them fixed after that, so anything that changes later shows up as a signal instead of being absorbed into the limits.
+**Decision.** I set the limits from an early stretch of data that I assume was healthy, the first 15 subgroups in the synthetic data and the first 300 runs in the real data, and I keep them fixed after that, so anything that changes later shows up as a signal instead of being absorbed into the limits.
 
-**Alternatives I turned down.** Limits from all the data hide a drift, and limits that keep updating absorb slow changes. I also considered more sensitive charts like the exponentially weighted moving average (EWMA) and the cumulative sum (CUSUM), but they are harder to explain and I wanted rules that a coworker could follow. The cost showed up on the real data, where the baseline itself wasn't stable, which is why those charts flag so many runs, and I report that instead of hiding it.
+**Alternatives I turned down.** Calculating the limits from all of the data lets a drift hide itself, and limits that keep updating would absorb slow changes in the same way. The cost of fixed limits showed up on the real data, where all 8 sensors already had signals inside the 300-run baseline, so the limits flag between 3.9% and 48.0% of later runs depending on the sensor, and I report that as it came out.
 
 ## 3. The hand-written rules were frozen before any model was trained
 
@@ -32,12 +32,12 @@ These are the main choices I made on OpsAudit. Each one says what the situation 
 
 **Decision.** I split it into three smaller questions asked in order, which procedure the document is about, what condition it describes, and what query expresses that condition, and I check each answer before moving on. In the run I recorded, the queue-deadline document went wrong at the second step because it measured from the end of the window instead of from each batch's last event, and I could see that before any query existed.
 
-**Alternatives I turned down.** One call can't tell me where a failure happened, and two calls would still mix understanding the document with writing the query. The first step also used to ask the model to explain its reasoning, but the API started refusing that intermittently, so it now asks for a quote from the document instead.
+**Alternatives I turned down.** One call returns only the final query, so when it is wrong I cannot tell which of the three jobs failed. Two calls would pair two of the jobs, most naturally understanding the document with writing the query, and then a wrong query could still come from either a misreading of the document or a mistake in the SQL, because the reading is hidden inside the writing. With three calls the middle one returns the condition as plain data, and the third call sees only that data and never the document, so anything the middle call got wrong cannot be corrected by luck later and I can judge that answer on its own. The first step also used to ask the model to explain its reasoning, but the API declined that request in testing, so it now asks for a short quote from the document instead.
 
 ## 5. Results are reported as they came out, including the weak ones
 
-**Context.** On the real data the control charts flag almost every run and no classifier clearly beat chance, and the AI layers made mistakes in the run I recorded. I also never expected a large effect, because operations already run acceptably without looking at silent misses, although from the work I did they matter more than they seem to, judging by the time and cost they saved.
+**Context.** On the real data the control charts flag almost every run and no classifier clearly beat chance, and the AI layers made mistakes in the run I recorded. The synthetic results are much stronger, but I designed that data, so they say little about how the methods would do on real documents.
 
-**Decision.** I report every number the way it came out, with intervals and with what limits it, because I fixed my choices before looking at results and didn't tune on the test data, and if it works then it works and if it doesn't then I say so.
+**Decision.** I report every number the way it came out, with confidence intervals where I computed them and a note on what limits each result. I fixed my choices before looking at results and did not tune on the test data, so a weak result is something to report plainly and not something to fix.
 
-**Alternatives I turned down.** I could have tuned until the numbers looked better, left out the real-data check, or shown only the synthetic results, which are strong because I designed the data.
+**Alternatives I turned down.** I could have tuned until the numbers looked better, left out the real-data check, or shown only the synthetic results, but each of those would have given a reader a more flattering picture than the evidence supports.

@@ -82,7 +82,7 @@ export default function ImpactTab() {
         <Stat label="Labor hours" value={hours(totals.hours)} note="manual recovery effort" />
         <Stat label="Cost at risk" value={money(totals.total)} note={`${money(totals.labor)} labor + ${money(totals.risk)} risk`} />
         <Stat
-          label="Annualised"
+          label="Annualized"
           value={money(totals.total * result.annualFactor)}
           note="window total x 365/14, if representative"
         />
@@ -239,7 +239,7 @@ export default function ImpactTab() {
           </li>
           <li>The inputs are illustrative. A real version would take them from a labor log and a cost ledger.</li>
           <li>
-            The annualised figure assumes these 14 days are representative, and two weeks of synthetic data cannot
+            The annualized figure assumes these 14 days are representative, and two weeks of synthetic data cannot
             support a forecast, so read it as a check on scale.
           </li>
           <li>

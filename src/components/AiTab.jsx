@@ -288,7 +288,7 @@ export default function AiTab() {
           <li>
             Each layer was run once, on five documents and one diagnosis, so this is a demonstration of the method and a
             different run could score differently. One change was made before the recorded run: the first step originally
-            asked the model to explain its reasoning, the model intermittently refused that, and it now asks for a quote from
+            asked the model to explain its reasoning, the API declined that request in testing, and it now asks for a quote from
             the document instead. Nothing was changed after the scores were seen.
           </li>
           <li>When the model writes a query that finds more than the baseline, I report that as a finding about the baseline&rsquo;s criteria instead of treating it as an error.</li>

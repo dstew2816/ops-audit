@@ -56,7 +56,7 @@ export default function ControlChart({ title, values, cl, ucl, lcl, sigma, hits 
             r={flagged.has(i) ? 4.5 : 2.5}
             className={flagged.has(i) ? 'fill-rose-400 stroke-slate-950' : 'fill-sky-300'}
           >
-            <title>{`${labels[i] ?? `#${i}`}: ${fmt(v)}${flagged.has(i) ? ' — out of control' : ''}`}</title>
+            <title>{`${labels[i] ?? `#${i}`}: ${fmt(v)}${flagged.has(i) ? ': out of control' : ''}`}</title>
           </circle>
         ))}
         {[0, Math.floor((values.length - 1) / 2), values.length - 1].map((i) => (
