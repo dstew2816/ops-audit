@@ -26,9 +26,9 @@ Given a procedure definition, decide (1) the **kind** of check (interval, state,
 | Random forest | 89.1% | 92.3% |
 | Hand rules, English keywords | 56.4% | 68.5% |
 | Hand rules, multilingual keywords | 66.3% | 73.6% |
-| Always guess the most common class | 2.9% | 15.3% |
+| Always guess the most common class | 2.9% | 42.4% |
 
-The tree's 95% interval on the specific type is 75.8% to 83.5%. Its cross-validation accuracy was 77.7% (± 2.5%). See the ML tab for per-class precision and recall, confusion matrices, common mix-ups and disagreement examples.
+The tree's 95% interval on the specific type is 75.8% to 83.5%. Its cross-validation accuracy was 77.7% (± 2.5%). See the Monitoring and models view on the site for per-class precision and recall, confusion matrices, common mix-ups and disagreement examples.
 
 **No single feature gives the label away.** The most important feature in the tree carries 7.4% of its importance. The best single feature alone scores 11.6% (chance is 3.0%). Removing the threshold features (cross-validated tree 76.9%), the condition features (78.1%) or both (77.4%) barely changes the full-feature 77.7%, so the model is reading the text, field name and entity, not one number.
 

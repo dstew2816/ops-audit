@@ -187,7 +187,7 @@ export default function SpcTab() {
         <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
           The process capability index (Cpk) uses the short-term noise within each subgroup, and the process
           performance index (Ppk) uses all of the variation, drift included. When Cpk is well above Ppk, the process
-          is capable while stable but did not stay stable.
+          is capable while stable but did not stay stable, so a station with three or more alerts is marked not in control even when its Cpk clears 1.33.
         </p>
         <div className="mt-3 overflow-x-auto rounded border border-slate-800 bg-slate-900">
           <table className="w-full text-[12px]">
@@ -201,8 +201,11 @@ export default function SpcTab() {
             <tbody className="divide-y divide-slate-800/70">
               {ids.map((id) => {
                 const a = analysis[id];
-                const band = capabilityBand(a.capability.cpk);
                 const count = a.xbarHits.length + a.rangeHits.length;
+                // Capability only means something for a process in control. One alert can be a false
+                // alarm; a run of them means the station has shifted, whatever its Cpk says.
+                const base = capabilityBand(a.capability.cpk);
+                const band = count >= 3 ? { label: `${base.label} on paper, not in control`, cls: 'text-rose-300' } : base;
                 return (
                   <tr
                     key={id}

@@ -152,7 +152,7 @@ export default function OverviewTab({ onNavigate }) {
           <Kpi
             value={cov ? pct(cov.missed / cov.qualifying) : '...'}
             label="of cases silently missed"
-            detail={cov ? `${cov.missed} of ${cov.qualifying} qualifying cases never picked up, across 7 procedures in 14 days` : 'Loading the audit'}
+            detail={cov ? `${cov.missed} of ${cov.qualifying} cases never picked up. Misses are planted far more often than the 4 to 6% seen at TSMC, so each kind shows up.` : 'Loading the audit'}
           />
           <Kpi
             value={imp ? money(imp.totals.total) : '...'}

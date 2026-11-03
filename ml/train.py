@@ -106,14 +106,17 @@ def slices(y_true, y_pred, info: pd.DataFrame) -> dict:
 
 
 def describe(row: pd.Series) -> dict:
+    # Blank text fields come back as NaN on newer pandas, and NaN is not valid JSON
+    # for the site to import, so they are written as null.
+    text = lambda v: None if pd.isna(v) else v
     return {
         "id": row["id"],
-        "name": row["name"],
-        "description": row["description"],
-        "entity": row["entity"],
-        "field": row["field"],
+        "name": text(row["name"]),
+        "description": text(row["description"]),
+        "entity": text(row["entity"]),
+        "field": text(row["field"]),
         "threshold": None if pd.isna(row["threshold"]) else str(row["threshold"]),
-        "condition": row["condition"],
+        "condition": text(row["condition"]),
         "language": row["lang"],
         "vague": bool(row["weak"]),
     }
@@ -192,7 +195,12 @@ def main() -> None:
         "random_forest": (forest.predict(X_test), None),
         "rules_en": (np.array([leaf for _, leaf in en]), [kind for kind, _ in en]),
         "rules_multi": (np.array([leaf for _, leaf in multi]), [kind for kind, _ in multi]),
-        "majority_class": (majority.predict(X_test), None),
+        # The floor guesses the most common class at each level on its own: the most
+        # common specific for the specific column, the most common kind for the kind column.
+        "majority_class": (
+            majority.predict(X_test),
+            [Counter(KIND_OF[x] for x in y_train).most_common(1)[0][0]] * len(y_test),
+        ),
     }
     truth = np.array(y_test)
     metrics = {}
