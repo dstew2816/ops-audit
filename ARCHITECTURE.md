@@ -13,7 +13,7 @@ flowchart LR
     R -. "stress test" .-> M
 ```
 
-Read it left to right as the order of the tabs. Solid arrows are real data dependencies; dotted arrows are grading (the audit's hand-written baselines are the answer key for the AI layers) or validation (SECOM tests the SPC and classification methods on real data).
+Read it left to right as roughly the order of the four views on the site (Summary, Audit and cost, Monitoring and models, Real-data check). Solid arrows are real data dependencies, and dotted arrows are either grading, where the audit's hand-written baselines are the answer key for the AI layers, or the stress test, where the public SECOM data is used to try the statistical process control (SPC) and classification methods on real data.
 
 ## Data
 
@@ -29,11 +29,11 @@ Read it left to right as the order of the tabs. Solid arrows are real data depen
 
 ## Impact
 
-`src/impact/impact.js` converts misses into labor hours and cost at risk using assumptions that are all editable on the Impact tab, then groups misses into fixes and ranks them by cost, hours or payback. `src/impact/misses.js` collects miss records from the baselines. `npm run impact:check` verifies that every miss lands in exactly one fix, that totals reconcile three ways, and that the model moves the right direction when an assumption changes.
+`src/impact/impact.js` converts misses into labor hours and cost at risk using assumptions that are all editable in the Audit and cost view, then groups misses into fixes and ranks them by cost, hours or payback. `src/impact/misses.js` collects miss records from the baselines. `npm run impact:check` verifies that every miss lands in exactly one fix, that totals reconcile three ways, and that the model moves the right direction when an assumption changes.
 
 ## Machine learning
 
-`ml/` is Python (pandas, scikit-learn). `taxonomy.py` defines 6 kinds of check and 33 specific types; `generate_data.py` writes 50 messy labeled records per type (four languages, missing fields, mixed units, noisy overlapping thresholds). `features.py` and `rules.py` never import the taxonomy, so the answers stay out of the code being tested. `train.py` does one stratified split, tunes by cross-validation on the training set only, scores the test set once, and writes `ml/results/results.json`, which the ML tab imports. `ml/ci_smoke.py` is the fast check used in CI.
+`ml/` is Python (pandas, scikit-learn). `taxonomy.py` defines 6 kinds of check and 33 specific types; `generate_data.py` writes 50 messy labeled records per type (four languages, missing fields, mixed units, noisy overlapping thresholds). `features.py` and `rules.py` never import the taxonomy, so the answers stay out of the code being tested. `train.py` does one stratified split, tunes by cross-validation on the training set only, scores the test set once, and writes `ml/results/results.json`, which the Monitoring and models view imports. `ml/ci_smoke.py` is the fast check used in continuous integration (CI).
 
 ## AI layers
 
@@ -41,8 +41,8 @@ Read it left to right as the order of the tabs. Solid arrows are real data depen
 
 ## Real-data stress test
 
-`ml/real/` runs individuals charts, time-split classification and a bridge to the audit on the public UCI SECOM dataset. `download_secom.py` fetches the raw files into a gitignored folder, and `secom_analysis.py` runs under `python -I`, with every choice fixed in its header before any result is seen. Results go to `ml/real/results/secom_results.json`, shown on the Real Data tab.
+`ml/real/` runs individuals charts, time-split classification and a bridge to the audit on the public UCI SECOM dataset. `download_secom.py` fetches the raw files into a gitignored folder, and `secom_analysis.py` runs under `python -I`, with every choice fixed in its header before any result is seen. Results go to `ml/real/results/secom_results.json`, shown in the Real-data check view.
 
 ## Site and delivery
 
-`src/App.jsx` and `src/components/` are presentation only; logic lives in the modules above. The Overview tab computes its headline numbers from the same sources as the detail tabs. GitHub Actions runs every check, the build and the ML smoke test on each push (`.github/workflows/ci.yml`) and deploys `dist/` to GitHub Pages (`deploy.yml`). `vite.config.js` uses a relative base so the site works from any Pages path.
+`src/App.jsx` and `src/components/` are presentation only; logic lives in the modules above. The Summary view computes its headline numbers from the same sources as the other views. GitHub Actions runs every check, the build and the ML smoke test on each push (`.github/workflows/ci.yml`) and deploys `dist/` to GitHub Pages (`deploy.yml`). `vite.config.js` uses a relative base so the site works from any Pages path.
