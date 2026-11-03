@@ -9,6 +9,7 @@ import ImpactTab from './components/ImpactTab';
 import MlTab from './components/MlTab';
 import RealDataTab from './components/RealDataTab';
 import AiTab from './components/AiTab';
+import { Part } from './components/More';
 
 const TABS = [
   { id: 'overview', label: 'Summary' },
@@ -33,7 +34,7 @@ const ROUTE = {
 const PORTFOLIO = 'https://dstew2816.github.io/';
 
 function Stack({ children }) {
-  return <div className="space-y-14">{children}</div>;
+  return <div className="space-y-16">{children}</div>;
 }
 
 function useTheme() {
@@ -69,10 +70,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <nav className="sticky top-3 z-20 mx-auto mt-3 max-w-[72rem] px-5" aria-label="Main">
+      <nav className="sticky top-3 z-20 mx-auto mt-3 max-w-[68rem] px-5" aria-label="Main">
         <div className="flex items-center justify-between gap-4 rounded-full border border-slate-800 bg-slate-900 py-2 pr-2 pl-5 shadow-sm">
           <span className="font-semibold text-slate-100">
-            OpsAudit <span className="font-normal text-slate-500">&middot; a project by David Stewart</span>
+            OpsAudit <span className="hidden font-normal text-slate-500 sm:inline">&middot; a project by David Stewart</span>
           </span>
           <div className="flex items-center gap-5 text-[14px] text-slate-500">
             <a className="hidden hover:text-slate-100 sm:inline" href={PORTFOLIO}>Portfolio</a>
@@ -98,8 +99,8 @@ export default function App() {
         </div>
       </nav>
 
-      <div className="mx-auto max-w-[72rem] px-5">
-        <div className="mt-8 overflow-x-auto border-b border-slate-800">
+      <div className="mx-auto max-w-[68rem] px-5">
+        <div className="mt-8 overflow-x-auto">
           <TabBar tabs={TABS} active={tab} onChange={go} />
         </div>
 
@@ -107,16 +108,40 @@ export default function App() {
           {tab === 'overview' && <OverviewTab onNavigate={go} tabs={TABS} />}
           {tab === 'audit' && (
             <Stack>
-              <AuditTab />
-              <ImpactTab />
-              <NetworkTab />
+              <Part
+                n="01 · The audit"
+                title="Which cases each procedure missed"
+                lead="Seven SQL queries, one per automated procedure, rebuild every case that should have triggered it and look for that case in the procedure's own log. The database is SQLite running in your browser, so every number below is computed when the page loads."
+              >
+                <AuditTab />
+              </Part>
+              <Part
+                n="02 · Cost"
+                title="What the misses cost, and which fix comes first"
+                lead="Each miss becomes labor hours and cost at risk, and misses that share a cause are grouped into one fix. The inputs are deliberately low assumptions, and you can edit them."
+              >
+                <ImpactTab />
+              </Part>
+              <Part
+                n="03 · Station network"
+                title="The route the batches take"
+                lead="Batches move through six stages, with two parallel lanes at the Process stage. This is the data the control charts on the next tab are built from."
+              >
+                <NetworkTab />
+              </Part>
             </Stack>
           )}
           {tab === 'models' && (
             <Stack>
-              <SpcTab />
-              <MlTab />
-              <AiTab />
+              <Part n="01 · Monitoring" title="Statistical process control">
+                <SpcTab />
+              </Part>
+              <Part n="02 · Machine learning" title="Classifying procedure definitions">
+                <MlTab />
+              </Part>
+              <Part n="03 · AI layers" title="Writing detection queries and grouping misses with Claude">
+                <AiTab />
+              </Part>
             </Stack>
           )}
           {tab === 'real' && <RealDataTab />}

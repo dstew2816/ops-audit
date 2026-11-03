@@ -32,9 +32,9 @@ function NumberField({ label, value, onChange, step = 1, min = 0, max, suffix })
 }
 
 const Stat = ({ label, value, note }) => (
-  <div className="rounded border border-slate-800 bg-slate-900/40 px-4 py-3">
-    <div className="text-[11px] tracking-wide text-slate-500 uppercase">{label}</div>
-    <div className="mt-1 font-mono text-[20px] text-slate-100">{value}</div>
+  <div className="rounded border border-slate-800 bg-slate-900 px-4 py-3">
+    <div className="eyebrow">{label}</div>
+    <div className="mt-1 font-mono text-[1.5rem] font-medium text-slate-100">{value}</div>
     {note && <div className="mt-0.5 text-[11px] text-slate-500">{note}</div>}
   </div>
 );
@@ -77,12 +77,6 @@ export default function ImpactTab() {
 
   return (
     <div className="space-y-12">
-      <p className="max-w-3xl text-[15px] leading-[1.75] text-slate-400">
-        Each detected miss is converted into labor hours, meaning the manual work to find and recover it, and into
-        cost at risk, which is that labor plus the chance that the miss caused real downstream cost. Every input is an
-        assumption on synthetic data and is set low, and the figures update as you change them.
-      </p>
-
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Misses" value={totals.misses} note={`in ${a.windowDays} days`} />
         <Stat label="Labor hours" value={hours(totals.hours)} note="manual recovery effort" />
@@ -116,9 +110,9 @@ export default function ImpactTab() {
           Each row is one fix, covering the misses that share a cause according to the hand-written diagnosis.
           Payback is the number of weeks of avoided cost it takes to repay the engineering effort of building the fix.
         </p>
-        <div className="mt-3 overflow-x-auto rounded border border-slate-800">
+        <div className="mt-3 overflow-x-auto rounded border border-slate-800 bg-slate-900">
           <table className="w-full text-[12px]">
-            <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+            <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
               <tr>
                 <th className="px-3 py-2 text-right font-medium">#</th>
                 <th className="px-3 py-2 text-left font-medium">Fix</th>
@@ -138,7 +132,7 @@ export default function ImpactTab() {
                   <td className="px-3 py-2 font-mono text-[11px] text-sky-300">{q.causeClass}</td>
                   <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">{q.misses}</td>
                   <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">{hours(q.hours)}</td>
-                  <td className="px-3 py-2 text-right font-mono tabular-nums text-amber-300">{money(q.total)}</td>
+                  <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-100">{money(q.total)}</td>
                   <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">{q.effortHours}</td>
                   <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">
                     {Number.isFinite(q.paybackWeeks) ? q.paybackWeeks.toFixed(1) : '—'}
@@ -164,7 +158,7 @@ export default function ImpactTab() {
           </button>
         </div>
         <div className="mt-3 grid gap-6 lg:grid-cols-2">
-          <div className="space-y-2 rounded border border-slate-800 bg-slate-900/40 p-4">
+          <div className="space-y-2 rounded border border-slate-800 bg-slate-900 p-4">
             <NumberField label="Loaded labor rate" value={a.laborRate} onChange={(v) => set({ laborRate: v })} suffix="$/h" />
             <NumberField
               label="Chance a miss causes real cost"
@@ -191,9 +185,9 @@ export default function ImpactTab() {
             ))}
           </div>
 
-          <div className="overflow-x-auto rounded border border-slate-800">
+          <div className="overflow-x-auto rounded border border-slate-800 bg-slate-900">
             <table className="w-full text-[12px]">
-              <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+              <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
                 <tr>
                   <th className="px-3 py-2 text-left font-medium">Procedure</th>
                   <th className="px-3 py-2 text-right font-medium">Misses</th>
@@ -227,7 +221,7 @@ export default function ImpactTab() {
                         className="w-20 rounded border border-slate-700 bg-slate-900 px-1.5 py-0.5 text-right font-mono text-slate-200"
                       />
                     </td>
-                    <td className="px-3 py-1.5 text-right font-mono tabular-nums text-amber-300">{money(p.total)}</td>
+                    <td className="px-3 py-1.5 text-right font-mono tabular-nums text-slate-100">{money(p.total)}</td>
                   </tr>
                 ))}
               </tbody>

@@ -18,7 +18,7 @@ export default function ControlChart({ title, values, cl, ucl, lcl, sigma, hits 
   const path = values.map((v, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
 
   return (
-    <figure className="rounded border border-slate-800 bg-slate-900/40 p-3">
+    <figure className="rounded border border-slate-800 bg-slate-900 p-3">
       <figcaption className="mb-1 flex items-baseline justify-between text-[12px]">
         <span className="font-medium text-slate-200">{title}</span>
         <span className="font-mono text-[11px] text-slate-500">

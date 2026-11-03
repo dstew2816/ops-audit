@@ -2,6 +2,7 @@
 // branching rules, scored on the same held-out set. The page only displays
 // ml/results/results.json; re-run `python ml/train.py` to regenerate it.
 
+import { More } from './More.jsx';
 import { useState } from 'react';
 import results from '../../ml/results/results.json';
 
@@ -64,8 +65,8 @@ function KindConfusion({ matrix }) {
                   key={j}
                   className="h-8 w-16 text-center font-mono"
                   style={{
-                    backgroundColor: v === 0 ? 'transparent' : i === j ? `rgba(52,211,153,${0.12 + 0.5 * (v / max)})` : `rgba(251,113,133,${0.2 + 0.6 * (v / max)})`,
-                    color: v === 0 ? '#475569' : '#e2e8f0',
+                    backgroundColor: v === 0 ? 'transparent' : i === j ? `rgba(141,148,157,${0.15 + 0.55 * (v / max)})` : `rgba(224,86,106,${0.18 + 0.6 * (v / max)})`,
+                    color: v === 0 ? 'var(--color-slate-600)' : 'var(--color-slate-50)',
                   }}
                 >
                   {v}
@@ -108,8 +109,8 @@ function LeafConfusion({ matrix }) {
                   className="h-[15px] w-[15px] min-w-[15px] border border-slate-900/60 text-center font-mono"
                   style={{
                     backgroundColor:
-                      v === 0 ? 'transparent' : i === j ? `rgba(52,211,153,${0.15 + 0.5 * Math.min(v / 12, 1)})` : `rgba(251,113,133,${0.3 + 0.6 * (v / max)})`,
-                    color: '#e2e8f0',
+                      v === 0 ? 'transparent' : i === j ? `rgba(141,148,157,${0.15 + 0.55 * Math.min(v / 12, 1)})` : `rgba(224,86,106,${0.25 + 0.6 * (v / max)})`,
+                    color: 'var(--color-slate-50)',
                     fontSize: 9,
                   }}
                 >
@@ -138,44 +139,23 @@ export default function MlTab() {
         The task is to read a messy procedure definition and work out two things: the <span className="text-slate-300">kind</span> of
         check it is ({results.kinds.length} kinds), and the <span className="text-slate-300">specific thing</span> it watches
         ({d.n_leaves} of them, such as queue time, time since preventive maintenance (PM), or a hold with no owner). A decision tree
-        learns this from labeled examples, and branching keyword rules written by hand try the same task. Both are scored once on
-        the same {d.n_test} held-out records.
+        and a random forest learn this from labeled examples, and branching keyword rules written by hand try the same task. All
+        of them are scored once on the same {d.n_test} held-out records.
       </p>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          ['Records', d.n, `${d.n_train} train / ${d.n_test} test · ${d.n_leaves} specifics`],
-          ['Tree: specific thing', pct(m.decision_tree.leaf_accuracy), `hand rules: ${pct(m.rules_en.leaf_accuracy)} (English), ${pct(m.rules_multi.leaf_accuracy)} (multilingual)`],
-          ['Tree: kind of check', pct(m.decision_tree.kind_accuracy), `hand rules: ${pct(m.rules_en.kind_accuracy)} (English)`],
-          ['Cross-validation', pct(cv.decision_tree.cv_leaf_accuracy_mean), `tree, ± ${pct(cv.decision_tree.cv_leaf_accuracy_std)} over 5 folds, train only`],
+          ['Random forest', pct(m.random_forest.leaf_accuracy), `names the specific check, 1 of ${d.n_leaves}`],
+          ['Decision tree', pct(m.decision_tree.leaf_accuracy), `same task; ${pct(cv.decision_tree.cv_leaf_accuracy_mean)} in 5-fold cross-validation`],
+          ['Hand-written rules', pct(m.rules_multi.leaf_accuracy), `best version (multilingual); English only ${pct(m.rules_en.leaf_accuracy)}`],
+          ['Records', d.n.toLocaleString(), `${d.n_train} train / ${d.n_test} held out, synthetic`],
         ].map(([label, value, note]) => (
-          <div key={label} className="rounded border border-slate-800 bg-slate-900/40 px-4 py-3">
-            <div className="text-[11px] tracking-wide text-slate-500 uppercase">{label}</div>
-            <div className="mt-1 font-mono text-[20px] text-slate-100">{value}</div>
+          <div key={label} className="rounded border border-slate-800 bg-slate-900 px-4 py-3">
+            <div className="eyebrow">{label}</div>
+            <div className="mt-1 font-mono text-[1.5rem] font-medium text-slate-100">{value}</div>
             <div className="mt-0.5 text-[11px] text-slate-500">{note}</div>
           </div>
         ))}
-      </section>
-
-      {/* Taxonomy ---------------------------------------------------------------- */}
-      <section>
-        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">What it is classifying</h2>
-        <div className="mt-3 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {results.kinds.map((k) => (
-            <div key={k} className="rounded border border-slate-800 bg-slate-900/40 p-3">
-              <div className="flex items-baseline justify-between">
-                <span className="font-mono text-[12px] text-sky-300">{k}</span>
-                <span className="text-[11px] text-slate-600">{leavesByKind[k].length} specifics</span>
-              </div>
-              <div className="mt-0.5 text-[11px] text-slate-500">{KIND_BLURB[k]}</div>
-              <ul className="mt-2 space-y-0.5 text-[12px] text-slate-400">
-                {leavesByKind[k].map((l) => (
-                  <li key={l.id}>{l.label}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
       </section>
 
       {/* Side by side ---------------------------------------------------------- */}
@@ -184,9 +164,9 @@ export default function MlTab() {
         <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
           Each bar shows test accuracy, and the pale bracket marks the 95% interval. Click a row for its detail below.
         </p>
-        <div className="mt-3 overflow-x-auto rounded border border-slate-800">
+        <div className="mt-3 overflow-x-auto rounded border border-slate-800 bg-slate-900">
           <table className="w-full text-[12px]">
-            <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+            <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
               <tr>
                 <th className="px-3 py-2 text-left font-medium">Method</th>
                 <th className="px-3 py-2 text-left font-medium">Kind of check</th>
@@ -240,9 +220,9 @@ export default function MlTab() {
           Detail: {MODELS.find((x) => x.id === selected).label}
         </h2>
         <div className="mt-3 grid gap-6 lg:grid-cols-2">
-          <div className="overflow-x-auto rounded border border-slate-800">
+          <div className="overflow-x-auto rounded border border-slate-800 bg-slate-900">
             <table className="w-full text-[12px]">
-              <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+              <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
                 <tr>
                   <th className="px-3 py-2 text-left font-medium">Kind</th>
                   <th className="px-3 py-2 text-right font-medium">Precision</th>
@@ -280,9 +260,9 @@ export default function MlTab() {
           ))}
         </ul>
 
-        <details className="mt-4 rounded border border-slate-800">
-          <summary className="cursor-pointer px-3 py-2 text-[12px] text-slate-300">
-            Confusion matrix for all {d.n_leaves} specific types (green diagonal = right, red = mix-up)
+        <details className="more mt-4 rounded border border-slate-800 bg-slate-900">
+          <summary className="px-4 py-2.5 text-[13px] text-slate-200">
+            Confusion matrix for all {d.n_leaves} specific types (grey diagonal = right, red = mix-up)
           </summary>
           <div className="p-3">
             <LeafConfusion matrix={sel.leaf_confusion} />
@@ -290,13 +270,13 @@ export default function MlTab() {
           </div>
         </details>
 
-        <details className="mt-4 rounded border border-slate-800">
-          <summary className="cursor-pointer px-3 py-2 text-[12px] text-slate-300">
+        <details className="more mt-4 rounded border border-slate-800 bg-slate-900">
+          <summary className="px-4 py-2.5 text-[13px] text-slate-200">
             All {d.n_leaves} specifics: precision, recall and F1
           </summary>
           <div className="overflow-x-auto">
             <table className="w-full text-[12px]">
-              <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+              <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
                 <tr>
                   <th className="px-3 py-2 text-left font-medium">Specific thing</th>
                   <th className="px-3 py-2 text-left font-medium">Kind</th>
@@ -326,13 +306,37 @@ export default function MlTab() {
         </details>
       </section>
 
+      <More label="The 33 kinds of check it names">
+      {/* Taxonomy ---------------------------------------------------------------- */}
+      <section>
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">What it is classifying</h2>
+        <div className="mt-3 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {results.kinds.map((k) => (
+            <div key={k} className="rounded border border-slate-800 bg-slate-900 p-3">
+              <div className="flex items-baseline justify-between">
+                <span className="font-mono text-[12px] text-sky-300">{k}</span>
+                <span className="text-[11px] text-slate-600">{leavesByKind[k].length} specifics</span>
+              </div>
+              <div className="mt-0.5 text-[11px] text-slate-500">{KIND_BLURB[k]}</div>
+              <ul className="mt-2 space-y-0.5 text-[12px] text-slate-400">
+                {leavesByKind[k].map((l) => (
+                  <li key={l.id}>{l.label}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+      </More>
+
+      <More label="Learned rules, feature checks, and where each method fails">
       {/* Learned vs hand rules ------------------------------------------------- */}
       <section>
         <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Learned rules vs hand rules</h2>
         <div className="mt-3 grid gap-6 lg:grid-cols-2">
           <div>
             <h3 className="text-[11px] tracking-wide text-slate-500 uppercase">Hand-written branching rules (frozen before training)</h3>
-            <pre className="mt-2 overflow-x-auto rounded border border-slate-800 bg-slate-900/50 p-3 font-mono text-[11px] leading-relaxed text-slate-300">
+            <pre className="mt-2 overflow-x-auto rounded border border-slate-800 bg-slate-900 p-3 font-mono text-[11px] leading-relaxed text-slate-300">
               {results.hand_rules.join('\n')}
             </pre>
             <p className="mt-2 text-[12px] leading-relaxed text-slate-500">
@@ -345,7 +349,7 @@ export default function MlTab() {
             <h3 className="text-[11px] tracking-wide text-slate-500 uppercase">
               Learned tree: top 3 levels of {results.tree.depth} ({results.tree.leaves} leaves in all)
             </h3>
-            <pre className="mt-2 max-h-80 overflow-auto rounded border border-slate-800 bg-slate-900/50 p-3 font-mono text-[11px] leading-relaxed text-slate-300">
+            <pre className="mt-2 max-h-80 overflow-auto rounded border border-slate-800 bg-slate-900 p-3 font-mono text-[11px] leading-relaxed text-slate-300">
               {results.tree.learned_rules_top}
             </pre>
             <p className="mt-2 text-[12px] leading-relaxed text-slate-500">
@@ -366,9 +370,9 @@ export default function MlTab() {
           importance, and chance across {d.n_leaves} types is {pct(results.feature_check.chance)}.
         </p>
         <div className="mt-3 grid gap-6 lg:grid-cols-2">
-          <div className="overflow-x-auto rounded border border-slate-800">
+          <div className="overflow-x-auto rounded border border-slate-800 bg-slate-900">
             <table className="w-full text-[12px]">
-              <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+              <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
                 <tr>
                   <th className="px-3 py-2 text-left font-medium">One feature on its own</th>
                   <th className="px-3 py-2 text-right font-medium">Accuracy (CV)</th>
@@ -385,9 +389,9 @@ export default function MlTab() {
             </table>
             <p className="px-3 py-2 text-[11px] text-slate-600">The five strongest single features. None comes close to the full model.</p>
           </div>
-          <div className="overflow-x-auto rounded border border-slate-800">
+          <div className="overflow-x-auto rounded border border-slate-800 bg-slate-900">
             <table className="w-full text-[12px]">
-              <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+              <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
                 <tr>
                   <th className="px-3 py-2 text-left font-medium">Tree with features removed</th>
                   <th className="px-3 py-2 text-right font-medium">Accuracy (CV)</th>
@@ -417,9 +421,9 @@ export default function MlTab() {
       {/* Where it works --------------------------------------------------------- */}
       <section>
         <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Where each method works and fails</h2>
-        <div className="mt-3 overflow-x-auto rounded border border-slate-800">
+        <div className="mt-3 overflow-x-auto rounded border border-slate-800 bg-slate-900">
           <table className="w-full text-[12px]">
-            <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+            <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
               <tr>
                 <th className="px-3 py-2 text-left font-medium">Accuracy on the specific thing</th>
                 {['informative', 'vague'].map((q) => (
@@ -456,9 +460,9 @@ export default function MlTab() {
           {dis.summary.tree_right_rules_wrong}, the rules are right and the tree is wrong on {dis.summary.rules_right_tree_wrong},
           and both are wrong on {dis.summary.both_wrong}. A sample of each kind is below.
         </p>
-        <div className="mt-3 overflow-x-auto rounded border border-slate-800">
+        <div className="mt-3 overflow-x-auto rounded border border-slate-800 bg-slate-900">
           <table className="w-full text-[12px]">
-            <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+            <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
               <tr>
                 <th className="px-3 py-2 text-left font-medium">Record</th>
                 <th className="px-3 py-2 text-left font-medium">Truth</th>
@@ -477,21 +481,22 @@ export default function MlTab() {
                     </div>
                   </td>
                   <td className="px-3 py-2 text-[11px] text-slate-300">{leafLabel[e.truth]}</td>
-                  <td className={`px-3 py-2 text-[11px] ${e.tree === e.truth ? 'text-emerald-300' : 'text-rose-300'}`}>{leafLabel[e.tree]}</td>
-                  <td className={`px-3 py-2 text-[11px] ${e.rules === e.truth ? 'text-emerald-300' : 'text-rose-300'}`}>{leafLabel[e.rules]}</td>
+                  <td className={`px-3 py-2 text-[11px] ${e.tree === e.truth ? 'text-slate-300' : 'text-rose-300'}`}>{leafLabel[e.tree]}</td>
+                  <td className={`px-3 py-2 text-[11px] ${e.rules === e.truth ? 'text-slate-300' : 'text-rose-300'}`}>{leafLabel[e.rules]}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </section>
+      </More>
 
       {/* Limits ---------------------------------------------------------- */}
       <section className="max-w-3xl text-[14px] leading-[1.7] text-slate-400">
         <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">How it was run, and how far to trust it</h2>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>
-            {results.protocol.split}. Tuning: {results.protocol.tuning}. The test set was used {results.protocol.test_set_used}.
+            Split: {results.protocol.split}. Tuning: {results.protocol.tuning}. The test set was used {results.protocol.test_set_used}.
             An earlier version with 30 records per type was run once during development, and I replaced it with a version
             that follows a fixed checklist (at least 50 per type, noisier thresholds, a feature check and a full confusion
             matrix) instead of anything tuned to its test scores. Only the final run is reported.
@@ -512,8 +517,8 @@ export default function MlTab() {
             messier than this generator.
           </li>
           <li>
-            The forest scores higher than the tree but is much harder to read, so the tree is the headline: it can be
-            explained rule by rule.
+            The forest scores highest, so it is the number on the summary page. The tree is shown in more detail here
+            because it can be read and explained rule by rule.
           </li>
         </ul>
       </section>

@@ -7,6 +7,7 @@
 // No model calls. Generation is a Node-side concern (npm run gen:check); the
 // browser never holds a key.
 
+import { More } from './More.jsx';
 import { useEffect, useState } from 'react';
 import { loadDatabase } from '../db/client.js';
 import { runQuery, listTables } from '../db/query.js';
@@ -93,52 +94,6 @@ export default function AuditTab() {
 
   return (
     <div className="space-y-12">
-      <p className="max-w-3xl text-[15px] leading-[1.75] text-slate-400">
-        This is a real SQLite database, built in the browser with sql.js from the seed rows in{' '}
-        <span className="font-mono text-slate-300">src/db/</span>. Every number below is computed by SQLite when the
-        page loads, from the coverage query and the detection query of each automated standard operating
-        procedure (ASOP), and nothing is precomputed.
-      </p>
-
-      {/* Tables ------------------------------------------------------------ */}
-      <section>
-        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">
-          Tables <span className="ml-1 font-mono text-[11px] text-slate-500">{tables.length}</span>
-        </h2>
-        <div className="mt-3 overflow-hidden rounded border border-slate-800">
-          <table className="w-full text-[12px]">
-            <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium">Table</th>
-                <th className="px-3 py-2 text-right font-medium">Rows</th>
-                <th className="px-3 py-2 text-left font-medium">Shape</th>
-                <th className="px-3 py-2 text-left font-medium">Detection semantics</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/70">
-              {tables.map((table) => (
-                <tr key={table.name} className="text-slate-300">
-                  <td className="px-3 py-2 font-mono text-slate-200">{table.name}</td>
-                  <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">
-                    {table.rows}
-                  </td>
-                  <td className="px-3 py-2">
-                    {table.shape ? (
-                      <span className="rounded bg-slate-800/70 px-1.5 py-0.5 font-mono text-[11px] text-sky-300">
-                        {table.shape}
-                      </span>
-                    ) : (
-                      <span className="text-[11px] text-slate-600">supporting</span>
-                    )}
-                  </td>
-                  <td className="px-3 py-2 text-slate-500">{table.summary ?? '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
       {/* Coverage per ASOP -------------------------------------------------- */}
       <section>
         <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">
@@ -149,11 +104,12 @@ export default function AuditTab() {
           </span>
         </h2>
         <p className="mt-1 text-[12px] text-slate-500">
-          Select a row to see its baseline query and the misses it returns.
+          Each row is one automated standard operating procedure (ASOP). Select a row to see its detection query and the
+          misses it returns.
         </p>
-        <div className="mt-3 overflow-hidden rounded border border-slate-800">
+        <div className="mt-3 overflow-hidden rounded border border-slate-800 bg-slate-900">
           <table className="w-full text-[12px]">
-            <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+            <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
               <tr>
                 <th className="px-3 py-2 text-left font-medium">ASOP</th>
                 <th className="px-3 py-2 text-left font-medium">Name</th>
@@ -186,7 +142,7 @@ export default function AuditTab() {
                     <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">
                       {row.logged}
                     </td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums text-amber-300">
+                    <td className="px-3 py-2 text-right font-mono tabular-nums text-rose-300">
                       {row.missed}
                     </td>
                   </tr>
@@ -207,7 +163,7 @@ export default function AuditTab() {
         </p>
 
         <h3 className="mt-4 text-[11px] tracking-wide text-slate-500 uppercase">Baseline query</h3>
-        <pre className="mt-2 overflow-x-auto rounded border border-slate-800 bg-slate-900/50 p-3 font-mono text-[11px] leading-relaxed text-slate-300">
+        <pre className="mt-2 max-h-96 overflow-auto rounded border border-slate-800 bg-slate-900 p-3 font-mono text-[11px] leading-relaxed text-slate-300">
           {baseline.sql.trim()}
         </pre>
 
@@ -220,9 +176,9 @@ export default function AuditTab() {
         {!missResult.ok ? (
           <p className="mt-2 font-mono text-[12px] text-rose-400">{missResult.error}</p>
         ) : (
-          <div className="mt-2 overflow-x-auto rounded border border-slate-800">
+          <div className="mt-2 overflow-x-auto rounded border border-slate-800 bg-slate-900">
             <table className="w-full text-[12px]">
-              <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+              <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
                 <tr>
                   {missResult.columns.map((column) => (
                     <th key={column} className="px-3 py-2 text-left font-medium whitespace-nowrap">
@@ -260,6 +216,47 @@ export default function AuditTab() {
           </div>
         )}
       </section>
+
+      <More label={`The ${tables.length} tables in the database`}>
+      <section>
+        <p className="max-w-3xl text-[14px] leading-[1.7] text-slate-400">
+          The seed rows live in <span className="font-mono text-slate-300">src/db/</span>. Six tables each hold one shape of
+          condition (a time interval, a countdown, a blank field and so on), and the rest support them.
+        </p>
+        <div className="mt-3 overflow-hidden rounded border border-slate-800 bg-slate-900">
+          <table className="w-full text-[12px]">
+            <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
+              <tr>
+                <th className="px-3 py-2 text-left font-medium">Table</th>
+                <th className="px-3 py-2 text-right font-medium">Rows</th>
+                <th className="px-3 py-2 text-left font-medium">Shape</th>
+                <th className="px-3 py-2 text-left font-medium">Detection semantics</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/70">
+              {tables.map((table) => (
+                <tr key={table.name} className="text-slate-300">
+                  <td className="px-3 py-2 font-mono text-slate-200">{table.name}</td>
+                  <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">
+                    {table.rows}
+                  </td>
+                  <td className="px-3 py-2">
+                    {table.shape ? (
+                      <span className="rounded bg-slate-800/70 px-1.5 py-0.5 font-mono text-[11px] text-sky-300">
+                        {table.shape}
+                      </span>
+                    ) : (
+                      <span className="text-[11px] text-slate-600">supporting</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2 text-slate-500">{table.summary ?? '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      </More>
     </div>
   );
 }

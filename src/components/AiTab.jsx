@@ -21,7 +21,7 @@ const DIAG_DIMENSIONS = [
 ];
 
 const Pill = ({ ok, children }) => (
-  <span className={`rounded px-1.5 py-0.5 font-mono text-[11px] ${ok ? 'bg-emerald-500/10 text-emerald-300' : 'bg-rose-500/10 text-rose-300'}`}>
+  <span className={`rounded px-1.5 py-0.5 font-mono text-[11px] ${ok ? 'border border-slate-700 text-slate-400' : 'border border-rose-400/40 bg-rose-500/10 text-rose-300'}`}>
     {children}
   </span>
 );
@@ -60,7 +60,7 @@ function GenerationRow({ entry }) {
         </td>
       </tr>
       {open && (
-        <tr className="bg-slate-900/40">
+        <tr className="bg-slate-900">
           <td colSpan={6} className="space-y-3 px-4 py-3 text-[12px] text-slate-400">
             {s?.failures?.length > 0 && (
               <div>
@@ -129,9 +129,9 @@ export default function AiTab() {
                 {generation.model} · recorded {formatDate(generation.recordedAt)} · one run per document
               </span>
             </div>
-            <div className="overflow-x-auto rounded border border-slate-800">
+            <div className="overflow-x-auto rounded border border-slate-800 bg-slate-900">
               <table className="w-full text-[12px]">
-                <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+                <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
                   <tr>
                     <th className="px-3 py-2 text-left font-medium">Document</th>
                     <th className="px-3 py-2 text-left font-medium">Expected</th>
@@ -195,7 +195,7 @@ export default function AiTab() {
               <span>Findings returned: <span className="font-mono text-slate-100">{diagnosis.findings.length}</span> (key: {EXPECTED_FINDINGS.length})</span>
               <span className="text-slate-600">{diagnosis.model} · recorded {formatDate(diagnosis.recordedAt)} · one call</span>
             </div>
-            <div className="overflow-hidden rounded border border-slate-800">
+            <div className="overflow-hidden rounded border border-slate-800 bg-slate-900">
               <table className="w-full text-[12px]">
                 <tbody className="divide-y divide-slate-800/70">
                   {DIAG_DIMENSIONS.map(([key, label]) => (
@@ -210,7 +210,7 @@ export default function AiTab() {
               </table>
             </div>
             {diag.failures?.length > 0 && (
-              <div className="rounded border border-slate-800 bg-slate-900/40 px-4 py-3 text-[12px] text-slate-400">
+              <div className="rounded border border-slate-800 bg-slate-900 px-4 py-3 text-[12px] text-slate-400">
                 <div className="text-[11px] tracking-wide text-slate-500 uppercase">Where it went wrong</div>
                 <ul className="mt-1 list-disc space-y-0.5 pl-5">
                   {diag.failures.map((f, i) => <li key={i}>{f}</li>)}
@@ -234,8 +234,8 @@ export default function AiTab() {
                 answer, although one of those four is a miss that the key does explain.
               </p>
             </div>
-            <details className="rounded border border-slate-800">
-              <summary className="cursor-pointer px-3 py-2 text-[12px] text-slate-300">Model findings</summary>
+            <details className="more rounded border border-slate-800 bg-slate-900">
+              <summary className="px-4 py-2.5 text-[13px] text-slate-200">Model findings</summary>
               <div className="divide-y divide-slate-800/70">
                 {diagnosis.findings.map((f, i) => (
                   <div key={i} className="px-3 py-2 text-[12px]">

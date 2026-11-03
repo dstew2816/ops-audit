@@ -24,7 +24,6 @@ const pct = (v, d = 1) => `${(v * 100).toFixed(d)}%`;
 const money = (v) => `$${Math.round(v).toLocaleString()}`;
 
 const H2 = 'text-[18px] font-semibold tracking-tight text-slate-100';
-const B = ({ children }) => <strong className="font-semibold text-slate-100">{children}</strong>;
 
 function Kpi({ value, label, detail }) {
   return (
@@ -112,14 +111,22 @@ export default function OverviewTab({ onNavigate }) {
           Finding what operations automation silently misses
         </h1>
         <p className="mt-4 text-[17px] leading-[1.7] text-slate-300">
-          OpsAudit is a rebuild of the audit I led at <B>TSMC</B>. It works out from raw history which cases{' '}
-          <B>should have</B> triggered each automated procedure, compares that with what the procedure actually logged,
-          and <B>prices the gap</B>. The result is a ranked list of fixes a manager can act on.
+          OpsAudit works out from raw history which cases should have triggered each automated procedure, compares that
+          with what the procedure actually logged, and prices the gap. The output is a ranked list of fixes that an
+          operations team can act on.
         </p>
         <p className="mt-3 text-[15px] leading-[1.7] text-slate-400">
-          Built with <B>SQL (SQLite)</B>, <B>Python and scikit-learn</B>, <B>statistical process control</B>,{' '}
-          <B>React</B> and an <B>LLM layer</B>, with checks that run in CI.
+          It is my own rebuild of the audit I proposed and led as an intern at TSMC Arizona, where the real version
+          covered 124 procedures and found silent failures equal to 4 to 6% of the runs that did start. That data cannot leave the company, so
+          this version runs on synthetic data I generated, plus one test on a public semiconductor dataset.
         </p>
+        <ul className="mt-4 flex flex-wrap gap-1.5" aria-label="Tools used">
+          {['SQL (SQLite)', 'Python', 'scikit-learn', 'Statistical process control', 'React', 'Claude API', 'GitHub Actions'].map((t) => (
+            <li key={t} className="rounded-full border border-slate-800 bg-slate-900 px-3 py-1 text-[12px] text-slate-400">
+              {t}
+            </li>
+          ))}
+        </ul>
         <div className="mt-5 flex flex-wrap gap-2">
           <a
             href={REPO}
@@ -170,13 +177,13 @@ export default function OverviewTab({ onNavigate }) {
         <h2 className={H2}>How it works</h2>
         <div className="mt-3 grid gap-3 md:grid-cols-3">
           <Step n="1" title="Rebuild what should have run">
-            SQL over the <B>raw events</B> works out every case that should have triggered a procedure.
+            SQL over the raw events works out every case that should have triggered a procedure.
           </Step>
           <Step n="2" title="Compare with the log">
-            A case with no entry in the automation&rsquo;s own log is a <B>silent miss</B>. The audit does not rely on that log to say what it missed.
+            A case with no entry in the automation&rsquo;s own log is a silent miss. The audit does not rely on that log to say what it missed.
           </Step>
           <Step n="3" title="Price and rank">
-            Each miss becomes <B>labor hours and cost at risk</B>, grouped by cause into fixes and ranked.
+            Each miss becomes labor hours and cost at risk, grouped by cause into fixes and ranked.
           </Step>
         </div>
       </section>
@@ -192,8 +199,9 @@ export default function OverviewTab({ onNavigate }) {
         <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
           {imp && top ? (
             <>
-              The largest fix, <B>{top.title.toLowerCase()}</B>, covers <B>{top.misses} of the {imp.totals.misses} misses</B> and about{' '}
-              <B>{Math.round((top.total / imp.totals.total) * 100)}%</B> of the cost at risk.
+              The largest fix, {top.title.charAt(0).toLowerCase() + top.title.slice(1)}, covers {top.misses} of the{' '}
+              {imp.totals.misses} misses and about {Math.round((top.total / imp.totals.total) * 100)}% of the cost at risk.
+              The top five are below.
             </>
           ) : (
             'Loading the audit.'
@@ -216,7 +224,7 @@ export default function OverviewTab({ onNavigate }) {
                   <td className="px-4 py-2">{q.title}</td>
                   <td className="px-4 py-2 text-right font-mono text-slate-400">{q.misses}</td>
                   <td className="px-4 py-2 text-right font-mono text-slate-400">{q.hours.toFixed(1)}</td>
-                  <td className="px-4 py-2 text-right font-mono text-amber-300">{money(q.total)}</td>
+                  <td className="px-4 py-2 text-right font-mono text-slate-100">{money(q.total)}</td>
                   <td className="px-4 py-2 text-right font-mono text-slate-400">{Number.isFinite(q.paybackWeeks) ? q.paybackWeeks.toFixed(1) : '—'}</td>
                 </tr>
               ))}
@@ -230,7 +238,7 @@ export default function OverviewTab({ onNavigate }) {
         <h2 className={H2}>Catching drift with control charts</h2>
         <p className="text-[15px] leading-[1.7] text-slate-300">
           I planted a slow drift in one of two parallel stations. With limits set from an early baseline and then held fixed,
-          the chart alerts <B>{spc.firstAlert - DRIFT_START} subgroups</B> after the drift starts: it began at subgroup{' '}
+          the chart alerts {spc.firstAlert - DRIFT_START} subgroups after the drift starts: it began at subgroup{' '}
           {DRIFT_START} and the first alert fired at subgroup {spc.firstAlert}.
         </p>
         <ControlChart
@@ -251,7 +259,7 @@ export default function OverviewTab({ onNavigate }) {
             The query behind every count, the editable cost model, and the station network the batches move through.
           </GoCard>
           <GoCard title="Monitoring and models" to="models" onNavigate={onNavigate}>
-            Control charts and process capability, the classifier with its confusion matrix, and two LLM layers with each failure shown.
+            Control charts and process capability, the classifier with its confusion matrix, and two AI layers built on Claude, with each of their mistakes shown.
           </GoCard>
           <GoCard title="Real-data check" to="real" onNavigate={onNavigate}>
             The same methods on a public semiconductor dataset, with the full results.
@@ -263,16 +271,16 @@ export default function OverviewTab({ onNavigate }) {
       <section className="max-w-3xl space-y-3">
         <h2 className={H2}>Limits</h2>
         <p className="text-[14px] leading-[1.7] text-slate-400">
-          Everything above runs on <B>synthetic data</B> that I built, with answer keys I wrote, so the classifier&rsquo;s
+          Everything above runs on synthetic data that I built, with answer keys I wrote, so the classifier&rsquo;s
           accuracy probably overstates what real documents would give, and every sample is small. The dollar figures come
-          from assumptions I chose. The two LLM layers were each run once: the first identified the right procedure for{' '}
+          from assumptions I chose. The two AI layers were each run once: the first identified the right procedure for{' '}
           {resolved} of {generation?.entries.length} documents, and the second recovered the outage cluster but also made
           two of the mistakes the data was built to provoke.
         </p>
         <p className="text-[14px] leading-[1.7] text-slate-400">
           On the public SECOM semiconductor dataset ({real.dataset.runs.toLocaleString()} production runs) the method did not
           hold up. {pct(bridge.share_failures_flagged)} of failing runs were flagged, but so were {pct(bridge.share_passes_flagged)} of
-          passing runs, and no classifier clearly beat chance (PR-AUC {models.decision_tree.pr_auc.toFixed(2)} to{' '}
+          passing runs, and no classifier clearly beat chance (area under the precision-recall curve of {models.decision_tree.pr_auc.toFixed(2)} to{' '}
           {models.random_forest.pr_auc.toFixed(2)} against {models.majority_class.pr_auc.toFixed(3)} for no skill). The{' '}
           <button type="button" onClick={() => onNavigate('real')} className="text-slate-100 underline decoration-slate-600 underline-offset-4">
             real-data view

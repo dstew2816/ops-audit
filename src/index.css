@@ -25,6 +25,16 @@
   --color-sky-300: #e1e4e8;
   --color-sky-400: #c4c9d0;
   --color-sky-500: #8d949d;
+
+  /* One signal color, as on the portfolio. Good states stay neutral; amber is kept
+     only for a softer warning (a marginal station, a signal inside the baseline). */
+  --color-rose-300: #e0566a;
+  --color-rose-400: #e0566a;
+  --color-rose-500: #e0566a;
+  --color-emerald-300: #c4c8ce;
+  --color-emerald-500: #8d949d;
+  --color-amber-300: #c9a46a;
+  --color-amber-400: #c9a46a;
 }
 
 :root[data-theme='light'] {
@@ -48,7 +58,9 @@
   --color-amber-400: #9a5d00;
   --color-rose-300: #9f1f33;
   --color-rose-400: #b3263a;
-  --color-emerald-300: #1b6b45;
+  --color-rose-500: #b3263a;
+  --color-emerald-300: #2b3036;
+  --color-emerald-500: #8a8f97;
 }
 
 @media (prefers-color-scheme: light) {
@@ -73,7 +85,9 @@
     --color-amber-400: #9a5d00;
     --color-rose-300: #9f1f33;
     --color-rose-400: #b3263a;
-    --color-emerald-300: #1b6b45;
+    --color-rose-500: #b3263a;
+    --color-emerald-300: #2b3036;
+    --color-emerald-500: #8a8f97;
   }
 }
 
@@ -107,4 +121,29 @@ body {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-slate-500);
+}
+
+/* Softer corners on every panel and table, close to the portfolio's cards */
+.rounded {
+  border-radius: 12px;
+}
+
+/* Collapsible detail blocks, styled like the portfolio's "More on what I did" */
+details.more > summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+details.more > summary::-webkit-details-marker {
+  display: none;
+}
+details.more > summary::after {
+  content: '+';
+  font: 500 1rem 'IBM Plex Mono', ui-monospace, monospace;
+  color: var(--color-slate-500);
+}
+details.more[open] > summary::after {
+  content: '\2212';
 }

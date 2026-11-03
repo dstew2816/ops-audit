@@ -2,6 +2,7 @@
 // stage and between stages. Computed by SQLite at page load, same as the Audit
 // tab. Context for the audit, and the raw material the SPC layer builds on.
 
+import { More } from './More.jsx';
 import { useEffect, useState } from 'react';
 import { loadDatabase } from '../db/client.js';
 import { runQuery } from '../db/query.js';
@@ -67,18 +68,12 @@ export default function NetworkTab() {
 
   return (
     <div className="space-y-12">
-      <p className="max-w-3xl text-[15px] leading-[1.75] text-slate-400">
-        Batches move through six stages. The Process stage runs on two parallel lanes that do the same job, so each
-        batch takes one or the other. Dwell is the time a batch spends at a station, and a handoff gap is the time
-        between leaving one station and arriving at the next.
-      </p>
-
       <section>
         <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Route</h2>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {stages.map((stage, index) => (
             <div key={stage.seq} className="flex items-center gap-2">
-              <div className="rounded border border-slate-800 bg-slate-900/50 px-3 py-2">
+              <div className="rounded border border-slate-800 bg-slate-900 px-3 py-2">
                 <div className="text-[12px] font-medium text-slate-200">{stage.rows[0].name}</div>
                 <div className="font-mono text-[11px] text-slate-500">
                   {stage.rows.map((row) => row.station_id).join(' · ')}
@@ -90,11 +85,16 @@ export default function NetworkTab() {
         </div>
       </section>
 
+      <More label="Dwell and handoff times by station">
+        <p className="max-w-3xl text-[14px] leading-[1.7] text-slate-400">
+          Dwell is the time a batch spends at a station, and a handoff gap is the time between leaving one station and
+          arriving at the next.
+        </p>
       <section>
         <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Dwell by station (minutes)</h2>
-        <div className="mt-3 overflow-hidden rounded border border-slate-800">
+        <div className="mt-3 overflow-hidden rounded border border-slate-800 bg-slate-900">
           <table className="w-full text-[12px]">
-            <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+            <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
               <tr>
                 <Head>Station</Head>
                 <Head>Name</Head>
@@ -123,9 +123,9 @@ export default function NetworkTab() {
 
       <section>
         <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Handoff gaps (minutes)</h2>
-        <div className="mt-3 overflow-hidden rounded border border-slate-800">
+        <div className="mt-3 overflow-hidden rounded border border-slate-800 bg-slate-900">
           <table className="w-full text-[12px]">
-            <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+            <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
               <tr>
                 <Head>From</Head>
                 <Head>To</Head>
@@ -148,6 +148,7 @@ export default function NetworkTab() {
           </table>
         </div>
       </section>
+      </More>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 // ml/real/results/secom_results.json, produced by ml/real/secom_analysis.py.
 // Every number is shown as it came out, including the weak ones.
 
+import { More } from './More.jsx';
 import { useState } from 'react';
 import real from '../../ml/real/results/secom_results.json';
 
@@ -14,11 +15,11 @@ const spc = real.spc;
 const cls = real.classification;
 const bridge = real.bridge;
 const MODELS = [
-  ['decision_tree', 'Decision tree', '#38bdf8'],
-  ['random_forest', 'Random forest', '#34d399'],
-  ['logistic_regression', 'Logistic regression', '#fbbf24'],
-  ['control_chart_rule', 'Control-chart rule', '#a78bfa'],
-  ['majority_class', 'Always predict pass', '#64748b'],
+  ['decision_tree', 'Decision tree', 'var(--color-slate-500)'],
+  ['random_forest', 'Random forest', 'var(--color-slate-100)'],
+  ['logistic_regression', 'Logistic regression', 'var(--color-rose-400)'],
+  ['control_chart_rule', 'Control-chart rule', 'var(--color-amber-300)'],
+  ['majority_class', 'Always predict pass', 'var(--color-slate-600)'],
 ];
 
 function SensorChart({ feature }) {
@@ -47,7 +48,7 @@ function SensorChart({ feature }) {
   });
 
   return (
-    <figure className="rounded border border-slate-800 bg-slate-900/40 p-3">
+    <figure className="rounded border border-slate-800 bg-slate-900 p-3">
       <figcaption className="mb-1 flex flex-wrap items-baseline justify-between gap-2 text-[12px]">
         <span className="font-medium text-slate-200">Sensor {feature.sensor}: individuals chart, every run in time order</span>
         <span className="font-mono text-[11px] text-slate-500">
@@ -106,7 +107,7 @@ function PrChart() {
   const y = (p) => pad.t + (1 - p) * (H - pad.t - pad.b);
   const prevalence = cls.test.fail_rate;
   return (
-    <figure className="rounded border border-slate-800 bg-slate-900/40 p-3">
+    <figure className="rounded border border-slate-800 bg-slate-900 p-3">
       <figcaption className="mb-1 text-[12px] font-medium text-slate-200">Precision against recall on the test period</figcaption>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Precision-recall curves">
         {[0, 0.25, 0.5, 0.75, 1].map((t) => (
@@ -118,13 +119,13 @@ function PrChart() {
         ))}
         <text x={(W + pad.l) / 2} y={H - 2} textAnchor="middle" className="fill-slate-500" fontSize="10">recall</text>
         <text x={10} y={H / 2} className="fill-slate-500" fontSize="10" transform={`rotate(-90 10 ${H / 2})`} textAnchor="middle">precision</text>
-        <line x1={pad.l} x2={W - pad.r} y1={y(prevalence)} y2={y(prevalence)} stroke="#64748b" strokeDasharray="4 3" />
+        <line x1={pad.l} x2={W - pad.r} y1={y(prevalence)} y2={y(prevalence)} style={{ stroke: 'var(--color-slate-600)' }} strokeDasharray="4 3" />
         {MODELS.filter(([id]) => cls.models[id].curve).map(([id, , color]) => (
           <path
             key={id}
             d={cls.models[id].curve.map(([r, p], i) => `${i === 0 ? 'M' : 'L'}${x(r).toFixed(1)},${y(p).toFixed(1)}`).join(' ')}
             fill="none"
-            stroke={color}
+            style={{ stroke: color }}
             strokeWidth="1.4"
           />
         ))}
@@ -172,9 +173,9 @@ export default function RealDataTab() {
           ['Sensors', d.sensors, `${d.sensors_constant} constant, ${d.sensors_over_50pct_missing} mostly missing`],
           ['Train / test', `${cls.train.runs} / ${cls.test.runs}`, `${cls.train.failures} / ${cls.test.failures} failures, split by time`],
         ].map(([label, value, note]) => (
-          <div key={label} className="rounded border border-slate-800 bg-slate-900/40 px-4 py-3">
-            <div className="text-[11px] tracking-wide text-slate-500 uppercase">{label}</div>
-            <div className="mt-1 font-mono text-[20px] text-slate-100">{value}</div>
+          <div key={label} className="rounded border border-slate-800 bg-slate-900 px-4 py-3">
+            <div className="eyebrow">{label}</div>
+            <div className="mt-1 font-mono text-[1.5rem] font-medium text-slate-100">{value}</div>
             <div className="mt-0.5 text-[11px] text-slate-500">{note}</div>
           </div>
         ))}
@@ -188,9 +189,9 @@ export default function RealDataTab() {
             {spc.selection}. These are individuals charts, with limits taken from the first {spc.baseline_runs} runs and then held fixed, and the Western Electric and Nelson run rules are applied to every later run. Click a row to chart that sensor.
           </p>
         </div>
-        <div className="overflow-x-auto rounded border border-slate-800">
+        <div className="overflow-x-auto rounded border border-slate-800 bg-slate-900">
           <table className="w-full text-[12px]">
-            <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+            <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
               <tr>
                 <th className="px-3 py-2 text-left font-medium">Sensor</th>
                 <th className="px-3 py-2 text-right font-medium">Signals in baseline</th>
@@ -206,7 +207,7 @@ export default function RealDataTab() {
                   <td className="px-3 py-1.5 font-mono text-slate-200">{f.sensor}</td>
                   <td className="px-3 py-1.5 text-right font-mono tabular-nums text-slate-400">{f.signals_in_baseline}</td>
                   <td className="px-3 py-1.5 text-right font-mono tabular-nums text-slate-400">{f.signals_post_baseline}</td>
-                  <td className="px-3 py-1.5 text-right font-mono tabular-nums text-amber-300">{pct(f.post_baseline_signal_rate)}</td>
+                  <td className="px-3 py-1.5 text-right font-mono tabular-nums text-slate-100">{pct(f.post_baseline_signal_rate)}</td>
                   <td className="px-3 py-1.5 text-right font-mono tabular-nums text-slate-400">{f.post_sd_over_sigma.toFixed(2)}×</td>
                   <td className="px-3 py-1.5 text-right font-mono tabular-nums text-slate-400">{f.post_mean_shift_in_sigma.toFixed(2)}</td>
                 </tr>
@@ -246,9 +247,9 @@ export default function RealDataTab() {
           </p>
         </div>
         <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-          <div className="overflow-x-auto rounded border border-slate-800">
+          <div className="overflow-x-auto rounded border border-slate-800 bg-slate-900">
             <table className="w-full text-[12px]">
-              <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+              <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
                 <tr>
                   <th className="px-3 py-2 text-left font-medium">Method</th>
                   <th className="px-3 py-2 text-right font-medium">PR-AUC</th>
@@ -311,9 +312,9 @@ export default function RealDataTab() {
             Only runs after the baseline are counted, since the baseline is where the limits were fitted.
           </p>
         </div>
-        <div className="overflow-x-auto rounded border border-slate-800">
+        <div className="overflow-x-auto rounded border border-slate-800 bg-slate-900">
           <table className="w-full text-[12px]">
-            <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+            <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
               <tr>
                 <th className="px-3 py-2 text-left font-medium">Look-back window</th>
                 <th className="px-3 py-2 text-right font-medium">Failures flagged</th>
@@ -330,7 +331,7 @@ export default function RealDataTab() {
                   <tr key={w} className={`text-slate-300 ${Number(w) === bridge.primary_window_runs ? 'bg-slate-800/40' : ''}`}>
                     <td className="px-3 py-1.5">{w === '0' ? 'that run only' : `that run + ${w} before`}{Number(w) === bridge.primary_window_runs ? ' (declared in advance)' : ''}</td>
                     <td className="px-3 py-1.5 text-right font-mono tabular-nums">{a.failures_flagged} / {a.failures} ({pct(a.share_failures_flagged)})</td>
-                    <td className="px-3 py-1.5 text-right font-mono tabular-nums text-amber-300">{a.failures_silent}</td>
+                    <td className="px-3 py-1.5 text-right font-mono tabular-nums text-rose-300">{a.failures_silent}</td>
                     <td className="px-3 py-1.5 text-right font-mono tabular-nums">{pct(a.share_passes_flagged)}</td>
                     <td className="px-3 py-1.5 text-right font-mono tabular-nums text-slate-400">{a.lift}×</td>
                     <td className="px-3 py-1.5 text-right font-mono tabular-nums text-slate-500">{a.fisher_p}</td>
@@ -355,10 +356,11 @@ export default function RealDataTab() {
           </p>
         </div>
 
+        <More label="By sensor, and every failure after the baseline">
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="overflow-x-auto rounded border border-slate-800">
+          <div className="overflow-x-auto rounded border border-slate-800 bg-slate-900">
             <table className="w-full text-[12px]">
-              <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+              <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
                 <tr>
                   <th className="px-3 py-2 text-left font-medium">Sensor</th>
                   <th className="px-3 py-2 text-right font-medium">Signal on failing runs</th>
@@ -378,9 +380,9 @@ export default function RealDataTab() {
               </tbody>
             </table>
           </div>
-          <div className="overflow-x-auto rounded border border-slate-800">
+          <div className="overflow-x-auto rounded border border-slate-800 bg-slate-900">
             <table className="w-full text-[12px]">
-              <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
+              <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
                 <tr>
                   <th className="px-3 py-2 text-left font-medium">Failing run</th>
                   <th className="px-3 py-2 text-left font-medium">Last signal</th>
@@ -398,7 +400,7 @@ export default function RealDataTab() {
                 {bridge.silent_failures.map((e) => (
                   <tr key={e.run} className="text-slate-300">
                     <td className="px-3 py-1.5 font-mono text-[11px]">#{e.run} {when(e.time)}</td>
-                    <td className="px-3 py-1.5 text-amber-300" colSpan={2}>silent: no signal at the run or the {bridge.primary_window_runs} before it</td>
+                    <td className="px-3 py-1.5 text-rose-300" colSpan={2}>silent: no signal at the run or the {bridge.primary_window_runs} before it</td>
                   </tr>
                 ))}
               </tbody>
@@ -406,6 +408,7 @@ export default function RealDataTab() {
             <p className="px-3 py-2 text-[11px] text-slate-600">The first 8 flagged failures after the baseline, then every silent one.</p>
           </div>
         </div>
+        </More>
       </section>
 
       {/* Limits ------------------------------------------------------------------ */}

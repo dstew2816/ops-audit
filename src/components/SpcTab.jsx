@@ -2,6 +2,7 @@
 // SQLite (station_measurements) and all statistics come from src/spc/spc.js, the
 // same code scripts/spc-check.mjs verifies.
 
+import { More } from './More.jsx';
 import { useEffect, useMemo, useState } from 'react';
 import { loadDatabase } from '../db/client.js';
 import { runQuery } from '../db/query.js';
@@ -13,7 +14,7 @@ const fmt = (value, digits = 2) => Number(value).toFixed(digits);
 
 // Cpk bands used by most industries: 1.33 is the usual "capable" bar.
 function capabilityBand(cpk) {
-  if (cpk >= 1.33) return { label: 'Capable', cls: 'text-emerald-300' };
+  if (cpk >= 1.33) return { label: 'Capable', cls: 'text-slate-400' };
   if (cpk >= 1.0) return { label: 'Marginal', cls: 'text-amber-300' };
   return { label: 'Not capable', cls: 'text-rose-300' };
 }
@@ -79,50 +80,6 @@ export default function SpcTab() {
         limits come from the first {BASELINE} subgroups, which I assume were healthy, and are held fixed afterward.
         Capability is a separate question, because it compares the process with the specification limits.
       </p>
-
-      {/* Capability --------------------------------------------------------- */}
-      <section>
-        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Process capability</h2>
-        <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-          The process capability index (Cpk) uses the short-term noise within each subgroup, and the process
-          performance index (Ppk) uses all of the variation, drift included. When Cpk is well above Ppk, the process
-          is capable while stable but did not stay stable.
-        </p>
-        <div className="mt-3 overflow-x-auto rounded border border-slate-800">
-          <table className="w-full text-[12px]">
-            <thead className="bg-slate-900/60 text-[11px] tracking-wide text-slate-500 uppercase">
-              <tr>
-                {['Station', 'Spec (min)', 'Mean', 'Cp', 'Cpk', 'Ppk', 'Verdict', 'Alerts'].map((h, i) => (
-                  <th key={h} className={`px-3 py-2 font-medium ${i === 0 || i === 6 ? 'text-left' : 'text-right'}`}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/70">
-              {ids.map((id) => {
-                const a = analysis[id];
-                const band = capabilityBand(a.capability.cpk);
-                const count = a.xbarHits.length + a.rangeHits.length;
-                return (
-                  <tr
-                    key={id}
-                    onClick={() => setStation(id)}
-                    className={`cursor-pointer ${id === station ? 'bg-slate-800/60' : 'hover:bg-slate-900/60'}`}
-                  >
-                    <td className="px-3 py-2 font-mono text-slate-200">{id}</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">{a.spec.lsl}–{a.spec.usl}</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">{fmt(a.capability.mean, 1)}</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">{fmt(a.capability.cp)}</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-200">{fmt(a.capability.cpk)}</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">{fmt(a.capability.ppk)}</td>
-                    <td className={`px-3 py-2 ${band.cls}`}>{band.label}</td>
-                    <td className={`px-3 py-2 text-right font-mono tabular-nums ${count ? 'text-amber-300' : 'text-slate-600'}`}>{count}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </section>
 
       {/* Charts ------------------------------------------------------------- */}
       <section>
@@ -224,12 +181,57 @@ export default function SpcTab() {
         </div>
       </section>
 
+      {/* Capability --------------------------------------------------------- */}
+      <section>
+        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">Process capability</h2>
+        <p className="mt-2 max-w-3xl text-[14px] leading-[1.7] text-slate-400">
+          The process capability index (Cpk) uses the short-term noise within each subgroup, and the process
+          performance index (Ppk) uses all of the variation, drift included. When Cpk is well above Ppk, the process
+          is capable while stable but did not stay stable.
+        </p>
+        <div className="mt-3 overflow-x-auto rounded border border-slate-800 bg-slate-900">
+          <table className="w-full text-[12px]">
+            <thead className="border-b border-slate-800 text-[11px] tracking-wide text-slate-500 uppercase">
+              <tr>
+                {['Station', 'Spec (min)', 'Mean', 'Cp', 'Cpk', 'Ppk', 'Verdict', 'Alerts'].map((h, i) => (
+                  <th key={h} className={`px-3 py-2 font-medium ${i === 0 || i === 6 ? 'text-left' : 'text-right'}`}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/70">
+              {ids.map((id) => {
+                const a = analysis[id];
+                const band = capabilityBand(a.capability.cpk);
+                const count = a.xbarHits.length + a.rangeHits.length;
+                return (
+                  <tr
+                    key={id}
+                    onClick={() => setStation(id)}
+                    className={`cursor-pointer ${id === station ? 'bg-slate-800/60' : 'hover:bg-slate-900/60'}`}
+                  >
+                    <td className="px-3 py-2 font-mono text-slate-200">{id}</td>
+                    <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">{a.spec.lsl}–{a.spec.usl}</td>
+                    <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">{fmt(a.capability.mean, 1)}</td>
+                    <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">{fmt(a.capability.cp)}</td>
+                    <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-200">{fmt(a.capability.cpk)}</td>
+                    <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">{fmt(a.capability.ppk)}</td>
+                    <td className={`px-3 py-2 ${band.cls}`}>{band.label}</td>
+                    <td className={`px-3 py-2 text-right font-mono tabular-nums ${count ? 'text-rose-300' : 'text-slate-600'}`}>{count}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <More label={`All ${alerts.length} alerts, by time`}>
       {/* Alerts -------------------------------------------------------------- */}
       <section>
         <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">
           Alerts <span className="ml-1 font-mono text-[11px] text-slate-500">{alerts.length}</span>
         </h2>
-        <div className="mt-3 max-h-80 overflow-auto rounded border border-slate-800">
+        <div className="mt-3 max-h-80 overflow-auto rounded border border-slate-800 bg-slate-900">
           <table className="w-full text-[12px]">
             <thead className="sticky top-0 bg-slate-900 text-[11px] tracking-wide text-slate-500 uppercase">
               <tr>
@@ -252,6 +254,7 @@ export default function SpcTab() {
           </table>
         </div>
       </section>
+      </More>
     </div>
   );
 }
