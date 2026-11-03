@@ -4,6 +4,7 @@
 // browser never holds an API key. Results files are optional: without them the
 // tab says nothing has been recorded rather than inventing numbers.
 
+import { More } from './More.jsx';
 import { useState } from 'react';
 import { BASELINES } from '../db/baselines.js';
 import { EXPECTED_FINDINGS } from '../db/expected-findings.js';
@@ -36,6 +37,16 @@ const NotRecorded = ({ command }) => (
 
 const formatDate = (iso) => new Date(iso).toISOString().slice(0, 10);
 
+// A plain-words verdict for each document, instead of the scorer's internal note.
+function verdict(entry) {
+  if (entry.ok) return 'exact match';
+  const c = entry.score?.counts;
+  if (!c || c.actual == null) return 'no runnable query';
+  if (c.actual > c.expected) return `${c.actual - c.expected} extra rows`;
+  if (c.actual < c.expected) return `${c.expected - c.actual} rows missing`;
+  return 'same count, different rows';
+}
+
 function GenerationRow({ entry }) {
   const [open, setOpen] = useState(false);
   const s = entry.score;
@@ -56,7 +67,7 @@ function GenerationRow({ entry }) {
         <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">{s?.counts?.actual ?? '—'}</td>
         <td className="px-3 py-2 text-right font-mono tabular-nums text-slate-400">{s?.counts?.expected ?? '—'}</td>
         <td className="px-3 py-2">
-          <Pill ok={entry.ok}>{entry.ok ? 'exact match' : entry.note}</Pill>
+          <Pill ok={entry.ok}>{verdict(entry)}</Pill>
         </td>
       </tr>
       {open && (
@@ -147,8 +158,11 @@ export default function AiTab() {
               </table>
             </div>
             <p className="text-[11px] text-slate-600">Click a row for the generated SQL and what differed from the baseline.</p>
+            <p className="max-w-3xl text-[14px] leading-[1.7] text-slate-300">
+              It picked the right procedure for all five documents. Two queries matched the hand-written ones exactly, two returned extra rows, and one never ran.
+            </p>
+            <More label="What went right and wrong, document by document">
             <div className="max-w-3xl space-y-3 text-[14px] leading-[1.7] text-slate-400">
-              <div className="text-[11px] tracking-wide text-slate-500 uppercase">Reading this run</div>
               <p>
                 The right procedure was resolved for all five documents, including the two port procedures that share a
                 table and differ only in the state they watch and how long they wait.
@@ -170,6 +184,7 @@ export default function AiTab() {
                 statement and the guardrail rejects that. I did not retry it.
               </p>
             </div>
+            </More>
           </>
         ) : (
           <NotRecorded command="npm run gen:check -- --save" />
@@ -209,6 +224,10 @@ export default function AiTab() {
                 </tbody>
               </table>
             </div>
+            <p className="max-w-3xl text-[14px] leading-[1.7] text-slate-300">
+              It recovered the outage cluster exactly, which is the finding worth the most, and made two of the mistakes the data was built to provoke.
+            </p>
+            <More label="What it got right and wrong">
             {diag.failures?.length > 0 && (
               <div className="rounded border border-slate-800 bg-slate-900 px-4 py-3 text-[12px] text-slate-400">
                 <div className="text-[11px] tracking-wide text-slate-500 uppercase">Where it went wrong</div>
@@ -218,7 +237,6 @@ export default function AiTab() {
               </div>
             )}
             <div className="max-w-3xl space-y-3 text-[14px] leading-[1.7] text-slate-400">
-              <div className="text-[11px] tracking-wide text-slate-500 uppercase">Reading this run</div>
               <p>
                 It recovered the outage cluster exactly: the 8 misses across four procedures that fell inside the
                 six-hour outage, classed as infrastructure with one system-level fix.
@@ -234,6 +252,7 @@ export default function AiTab() {
                 answer, although one of those four is a miss that the key does explain.
               </p>
             </div>
+            </More>
             <details className="more rounded border border-slate-800 bg-slate-900">
               <summary className="px-4 py-2.5 text-[13px] text-slate-200">Model findings</summary>
               <div className="divide-y divide-slate-800/70">
@@ -254,9 +273,9 @@ export default function AiTab() {
         )}
       </section>
 
+      <More label="How the grading works">
       <section className="max-w-3xl text-[14px] leading-[1.7] text-slate-400">
-        <h2 className="text-[18px] font-semibold tracking-tight text-slate-100">How the grading works</h2>
-        <ul className="mt-2 list-disc space-y-1 pl-5">
+        <ul className=" list-disc space-y-1 pl-5">
           <li>
             The baselines and the answer key are written by hand. Rules that separate the planted clusters would be
             written knowing what was planted, so a model that reproduced them would prove nothing.
@@ -269,12 +288,13 @@ export default function AiTab() {
           <li>
             Each layer was run once, on five documents and one diagnosis, so this is a demonstration of the method and a
             different run could score differently. One change was made before the recorded run: the first step originally
-            asked the model to explain its reasoning, the API intermittently refused that, and it now asks for a quote from
+            asked the model to explain its reasoning, the model intermittently refused that, and it now asks for a quote from
             the document instead. Nothing was changed after the scores were seen.
           </li>
           <li>When the model writes a query that finds more than the baseline, I report that as a finding about the baseline&rsquo;s criteria instead of treating it as an error.</li>
         </ul>
       </section>
+      </More>
     </div>
   );
 }
