@@ -36,7 +36,7 @@ Earlier versions had a second, IT-themed dataset with a JavaScript detector. It 
 
 This is a real SQLite database built in the browser with sql.js, and it is the only data layer. Every view reads it, and the audit result of 92 qualifying cases, 68 logged and 24 missed (26.1%) comes from the seven baselines in `baselines.js`. The expected totals are 13 tables and 1,997 rows, and `npm run db:check` fails if a change moves any of the counts.
 
-Two engine modules import this layer, both by design and both in the same direction. `src/engine/` depends on `src/db/`, and `src/db/` never imports `src/engine/`. `generate-sql.js` takes the roster of automated procedures and the schema definitions from the seed layer, and `score.js` takes the query runner, the baselines and the house rules. In the code an automated procedure is called an ASOP, and the identifiers such as ASOP-114 appear in the data, the queries and the saved results, so they are left as they are.
+Two engine modules import this layer, both by design and both in the same direction. `src/engine/` depends on `src/db/`, and `src/db/` never imports `src/engine/`. `generate-sql.js` takes the roster of automated procedures and the schema definitions from the seed layer, and `score.js` takes the query runner, the baselines and the house rules. In the code an automated procedure is called an ASOP (automated standard operating procedure), and the identifiers such as ASOP-114 appear in the data, the queries and the saved results, so they are left as they are.
 
 There are six candidate tables with genuinely different schemas and time semantics (interval, countdown, unplanned window, null check, absence and retry chain), because a real platform runs many automations that each target a different kind of candidate.
 
@@ -118,7 +118,7 @@ The scorer is pure, with no model, no network and no database. It has five dimen
 
 ## The SPC layer (`src/spc/`, Monitoring and models view)
 
-`src/spc/spc.js` holds pure functions for X-bar/R and individuals (I-MR) limits, the capability indices Cp, Cpk, Pp and Ppk, the Western Electric rules 1 to 4 and Nelson rules 5 and 6, and cross-station drift (`pairDrift`, a control chart on the difference between two stations that should agree). Limits are set from the first 15 subgroups (`BASELINE`) and held fixed, because setting them from all of the data lets a drift pull the centre line toward itself.
+`src/spc/spc.js` holds pure functions for X-bar/R and individuals (I-MR) limits, the capability indices Cp, Cpk, Pp and Ppk, the Western Electric rules 1 to 4 and Nelson rules 5 and 6, and cross-station drift (`pairDrift`, a control chart on the difference between two stations that should agree). Limits are set from the first 15 subgroups (`BASELINE`) and held fixed, because setting them from all of the data lets a drift pull the center line toward itself.
 
 The data is in `station_specs` and `station_measurements` (7 stations, 30 subgroups and 5 readings each, which is 1,050 rows), seeded in `src/db/seed/measurements.js`. The planted problems are that ST-3B drifts upward from subgroup 15, and that ST-4 has a one-subgroup spike at subgroup 22 and a wide spread (Cpk about 1.1). `npm run spc:check` verifies the math against hand-worked answers, that each rule fires on a constructed pattern, that the planted problems are found, and that healthy stations stay quiet. ST-3A raises one chance alert, which is expected with 30 points and six rules and is reported and not hidden.
 

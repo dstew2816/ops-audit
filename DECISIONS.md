@@ -4,7 +4,7 @@ These are the main choices I made on OpsAudit. Each one says what the situation 
 
 ## 1. Synthetic data for the audit, and a public real dataset as a stress test
 
-**Context.** I can't copy any data from TSMC, and I couldn't find a public dataset that has both things an audit like this needs, which are the raw events showing that something happened and the automation's own record of what it did. Building the data myself let me plant the kinds of failures that are commonly misunderstood or missed, with the right answers known in advance, so I could show how the audit finds them. The catch is that I'm the one who built the data, so what it shows could be biased by how I built it.
+**Context.** I can't use any data from my internship, and I couldn't find a public dataset that has both things an audit like this needs, which are the raw events showing that something happened and the automation's own record of what it did. Building the data myself let me plant the kinds of failures that are commonly misunderstood or missed, with the right answers known in advance, so I could show how the audit finds them. The catch is that I'm the one who built the data, so what it shows could be biased by how I built it.
 
 **Decision.** I used synthetic data for the audit itself and ran the control chart and classification methods on a real public dataset, the SECOM data from the University of California, Irvine, to see how they behave on data that I didn't create and couldn't shape.
 
@@ -12,7 +12,7 @@ These are the main choices I made on OpsAudit. Each one says what the situation 
 
 ## 2. Control limits come from an early baseline and are then held fixed
 
-**Context.** A control chart needs limits that describe how the process behaves when it is healthy. If the limits are calculated from all of the data, a drift that is present in the data pulls the centre line toward itself and widens the limits, so the drift is partly absorbed and looks weaker than it is.
+**Context.** A control chart needs limits that describe how the process behaves when it is healthy. If the limits are calculated from all of the data, a drift that is present in the data pulls the center line toward itself and widens the limits, so the drift is partly absorbed and looks weaker than it is.
 
 **Decision.** I set the limits from an early stretch of data that I assume was healthy, the first 15 subgroups in the synthetic data and the first 300 runs in the real data, and I keep them fixed after that, so anything that changes later shows up as a signal instead of being absorbed into the limits.
 

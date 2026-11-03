@@ -81,7 +81,7 @@ function SensorChart({ feature }) {
               r={sig ? 2.6 : 1.4}
               className={sig ? (after ? 'fill-rose-400' : 'fill-amber-300') : 'fill-sky-300/80'}
             >
-              <title>{`Run ${i} (${when(real.timestamps[i])}): ${v}${sig ? ` — ${sig.join(', ')}` : ''}`}</title>
+              <title>{`Run ${i} (${when(real.timestamps[i])}): ${v}${sig ? `: ${sig.join(', ')}` : ''}`}</title>
             </circle>
           );
         })}
@@ -223,7 +223,7 @@ export default function RealDataTab() {
             used to set the limits ({Math.min(...spc.features.map((f) => f.signals_in_baseline))} to {Math.max(...spc.features.map((f) => f.signals_in_baseline))} each).
             After the baseline, the spread is up to {Math.max(...spc.features.map((f) => f.post_sd_over_sigma)).toFixed(1)} times what the limits
             assume, while the average barely moves (under {Math.ceil(Math.max(...spc.features.map((f) => Math.abs(f.post_mean_shift_in_sigma))) * 10) / 10} standard
-            deviations). Limits built from run-to-run differences are tight when neighbouring runs resemble each other, so the
+            deviations). Limits built from run-to-run differences are tight when neighboring runs resemble each other, so the
             extra spread shows up as constant out-of-control signals. The likely causes are autocorrelation and non-normal
             readings, which a plain individuals chart does not handle, and I did not test that further.
           </p>
@@ -256,7 +256,7 @@ export default function RealDataTab() {
                   <th className="px-3 py-2 text-right font-medium">95% interval</th>
                   <th className="px-3 py-2 text-right font-medium">Precision</th>
                   <th className="px-3 py-2 text-right font-medium">Recall</th>
-                  <th className="px-3 py-2 text-right font-medium">TP / FP / FN</th>
+                  <th className="px-3 py-2 text-right font-medium" title="True positives / false positives / false negatives">TP / FP / FN</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/70">
