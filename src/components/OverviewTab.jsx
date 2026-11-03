@@ -161,13 +161,13 @@ export default function OverviewTab({ onNavigate }) {
           />
           <Kpi
             value={pct(m.random_forest.leaf_accuracy)}
-            label="classifier accuracy"
+            label="classifier accuracy, on synthetic data"
             detail={`Random forest naming one of ${ml.dataset.n_leaves} kinds of check, versus ${pct(m.rules_multi.leaf_accuracy)} for hand-written rules, on ${ml.dataset.n_test} held-out records`}
           />
           <Kpi
             value={`${spc.firstAlert - DRIFT_START} subgroups`}
             label="to catch a planted drift"
-            detail={`The drift began at subgroup ${DRIFT_START} and the first alert fired at subgroup ${spc.firstAlert}, with limits fixed from an early baseline.`}
+            detail={`The drift began at subgroup ${DRIFT_START} and the first alert fired at subgroup ${spc.firstAlert}, where a subgroup is five measurements in a row and the limits were fixed from an early baseline.`}
           />
         </div>
       </section>
@@ -267,6 +267,83 @@ export default function OverviewTab({ onNavigate }) {
         </div>
       </section>
 
+      {/* Scope and success ---------------------------------------------------- */}
+      <section className="max-w-3xl space-y-3">
+        <h2 className={H2}>How I scoped it</h2>
+        <p className="text-[15px] leading-[1.7] text-slate-300">
+          I kept the scope to what one person can check from start to finish. The audit looks at seven automated procedures
+          that between them involve six different shapes of condition (a time interval, a countdown, a blank field, an event
+          that never happened and so on), over a 14-day window, which is enough to show every kind of miss without burying
+          a mistake in a large pile of data. The answer key is written by hand, and every number on this site traces back to
+          a query that you can open and read in the Audit and cost view.
+        </p>
+        <p className="text-[15px] leading-[1.7] text-slate-300">
+          I also left out what the data could not support. A real audit needs two independent sources, the raw events and
+          the automation&rsquo;s own log, and public datasets rarely have both, so the audit itself runs on synthetic data
+          and the public SECOM dataset is used only to stress test the control charts and the classifier. The cost figures
+          use deliberately low assumptions that anyone can change, so the size of the problem is a range to argue about and
+          not a promise.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <div className="max-w-3xl space-y-3">
+          <h2 className={H2}>How I would measure success</h2>
+          <p className="text-[15px] leading-[1.7] text-slate-300">
+            A fix is only worth making if the numbers move afterwards, so I would track a small set of measures from the day
+            the first fix ships and compare them with the starting point this demo produces. The table gives each measure,
+            where it stands here, and what a good result would look like.
+          </p>
+        </div>
+        <div className="overflow-x-auto rounded-[14px] border border-slate-800 bg-slate-900">
+          <table className="w-full text-[13px]">
+            <thead className="text-[11px] tracking-wide text-slate-500 uppercase">
+              <tr>
+                <th className="px-4 py-2.5 text-left font-medium">Measure</th>
+                <th className="px-4 py-2.5 text-left font-medium">In this demo</th>
+                <th className="px-4 py-2.5 text-left font-medium">What a good result looks like</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800 text-slate-300">
+              <tr>
+                <td className="px-4 py-2 align-top">Share of cases missed</td>
+                <td className="px-4 py-2 align-top text-slate-400">
+                  {cov ? `${pct(cov.missed / cov.qualifying)} (${cov.missed} of ${cov.qualifying})` : 'Loading'}
+                </td>
+                <td className="px-4 py-2 align-top text-slate-400">
+                  It falls after each fix, and the misses that remain are grouped by cause so that a fix that did nothing is easy to see.
+                </td>
+              </tr>
+              <tr>
+                <td className="px-4 py-2 align-top">Cost at risk</td>
+                <td className="px-4 py-2 align-top text-slate-400">
+                  {imp ? `${money(imp.totals.total)} and ${imp.totals.hours.toFixed(1)} labor hours over 14 days` : 'Loading'}
+                </td>
+                <td className="px-4 py-2 align-top text-slate-400">
+                  It falls along with the miss rate, using the same assumptions each time so that the comparison stays fair.
+                </td>
+              </tr>
+              <tr>
+                <td className="px-4 py-2 align-top">Time before a miss is noticed</td>
+                <td className="px-4 py-2 align-top text-slate-400">Not measured here, because the synthetic log has no response times.</td>
+                <td className="px-4 py-2 align-top text-slate-400">
+                  Short enough that a person catches a missed case before it causes cost, which a real log could show.
+                </td>
+              </tr>
+              <tr>
+                <td className="px-4 py-2 align-top">Whether the audit itself is right</td>
+                <td className="px-4 py-2 align-top text-slate-400">
+                  The {cov ? cov.missed : ''} misses are checked against a hand-written answer key.
+                </td>
+                <td className="px-4 py-2 align-top text-slate-400">
+                  Every reported miss is a real one, and a case that a recorded exception explains is still counted and labeled with its reason, not hidden.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       {/* Limits, last --------------------------------------------------------- */}
       <section className="max-w-3xl space-y-3">
         <h2 className={H2}>Limits</h2>
@@ -280,8 +357,8 @@ export default function OverviewTab({ onNavigate }) {
         <p className="text-[14px] leading-[1.7] text-slate-400">
           On the public SECOM semiconductor dataset ({real.dataset.runs.toLocaleString()} production runs) the method did not
           hold up. {pct(bridge.share_failures_flagged)} of failing runs were flagged, but so were {pct(bridge.share_passes_flagged)} of
-          passing runs, and no classifier clearly beat chance (area under the precision-recall curve of {models.decision_tree.pr_auc.toFixed(2)} to{' '}
-          {models.random_forest.pr_auc.toFixed(2)} against {models.majority_class.pr_auc.toFixed(3)} for no skill). The{' '}
+          passing runs, and no classifier clearly beat chance (their scores were {models.decision_tree.pr_auc.toFixed(2)} to{' '}
+          {models.random_forest.pr_auc.toFixed(2)}, where a model that only guesses scores {models.majority_class.pr_auc.toFixed(3)}). The{' '}
           <button type="button" onClick={() => onNavigate('real')} className="text-slate-100 underline decoration-slate-600 underline-offset-4">
             real-data view
           </button>{' '}
