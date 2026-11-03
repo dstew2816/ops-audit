@@ -117,7 +117,7 @@ export default function OverviewTab({ onNavigate }) {
         </p>
         <p className="mt-3 text-[15px] leading-[1.7] text-slate-400">
           It is my own rebuild of the audit I proposed and led as an intern at TSMC Arizona, where the real version
-          covered 124 procedures and found silent failures equal to 4 to 6% of the runs that did start. That data cannot leave the company, so
+          covered 130 procedures and found silent failures equal to 4 to 6% of the runs that did start. That data cannot leave the company, so
           this version runs on synthetic data I generated, plus one test on a public semiconductor dataset.
         </p>
         <ul className="mt-4 flex flex-wrap gap-1.5" aria-label="Tools used">
