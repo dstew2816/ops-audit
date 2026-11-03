@@ -8,6 +8,12 @@ Live demo: https://dstew2816.github.io/ops-audit/
 
 This is a demo of the kind of work I did at TSMC. Everything in it is synthetic data, apart from one stress test on a public dataset.
 
+## The short version
+
+In 14 days of made-up factory data, 24 of the 92 cases that should have triggered an automated procedure were never picked up, and nothing recorded that they were missed, which is 26.1% of them. OpsAudit finds those cases, puts a figure on them of about 17.6 labor hours and $3,618 at risk, and ranks the fixes so that a team knows which one to make first.
+
+The quickest way to see it is the Summary page of the live demo, which takes about a minute to read, and the Audit and cost view shows the query behind every number.
+
 ![The OpsAudit home page](docs/overview.jpg)
 
 ## The problem
